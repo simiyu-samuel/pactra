@@ -1,0 +1,24 @@
+# Local credentials and machine-specific settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+
+# Future application output
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.turbo/
+playwright-report/
+test-results/
+*.log
+
+# Local runtime data and private exports
+.local/
+tmp/
+private-exports/

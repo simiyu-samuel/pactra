@@ -1,0 +1,4 @@
+seller_id,display_name,strategy,currency,standard_shipping_cents,standard_arrival_days,express_shipping_cents,express_arrival_days,warranty_months,policy_version
+pixel_port,Pixel Port,price_first,USD,800,5,1800,2,12,1
+studio_stack,Studio Stack,bundle_first,USD,1000,4,2000,2,24,1
+swift_gear,Swift Gear,speed_first,USD,1500,2,2500,1,12,1

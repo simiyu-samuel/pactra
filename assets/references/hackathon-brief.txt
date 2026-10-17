@@ -1,0 +1,47 @@
+PayPal AI Hackathon — summary of the overview supplied by the user
+Reference captured for planning on October 17, 2026.
+
+Purpose: create or meaningfully advance a working project using both PayPal
+and an AI tool, model, or platform. PayPal integration must be central.
+No prescribed problem statements or tracks were specified in the overview.
+
+Required development environment: PayPal's free sandbox for the payment
+integration. At least one PayPal technology/API/SDK/product/developer
+capability and meaningful AI functionality are required.
+
+Deadline stated in the supplied overview:
+November 12, 2026, 11:00 pm GMT+3 (23:00 Africa/Nairobi).
+
+The overview allows individual or team entries and new or existing projects
+with meaningful progress made during the hackathon.
+
+Submission must include:
+- A working project and a text explanation of features/functionality.
+- A hosted demo URL or complete setup/run instructions for judges.
+- A public GitHub, GitLab, or Bitbucket source repository with required
+  assets/instructions and a visible top-level open-source license.
+- Identification of the AI tools/model/services used and how they were used.
+- A public YouTube demo video shorter than three minutes, showing the
+  functioning product on its intended device.
+- Compliance with the full official rules and restrictions on unpermitted
+  third-party marks or copyrighted media in the demo.
+
+Judging criteria:
+- Technical implementation of PayPal and AI.
+- Complete and coherent product design.
+- Credible impact for a specific audience and demonstrated problem.
+- Creativity and distinction from existing concepts.
+- Clear end-to-end presentation and explanation.
+
+Relevant listed awards include overall placement, Most Creative,
+Most Impactful, Best Demo Delivery, Best Use of PayPal + AI, and
+Best Use of Agentic Commerce. Optional sponsor awards also exist.
+The pasted overview gives inconsistent aggregate prize totals, so this
+summary intentionally does not reproduce one as authoritative.
+
+Sponsor tools are optional. The supplied list names AG Grid, APIMatic,
+Astropods, Bryntum, Channel3, Elastic, KERNEL, Postman, Render, and Zapier.
+
+This is an attributed planning summary, not the full official rules.
+The authoritative event URL, eligibility exceptions, exact official rules,
+and submission-form details must be checked before final submission.

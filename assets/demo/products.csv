@@ -1,0 +1,9 @@
+product_id,name,role,capability_score,max_video_mode,audio_interface,tripod_mount,fictional
+CAM-01,Vela C1,camera,80,4K30,3.5mm_TRS_input,quarter_inch,true
+CAM-02,Nova M2,camera,94,4K60,3.5mm_TRS_input,quarter_inch,true
+CAM-03,Mira S1,camera,68,1080p60,3.5mm_TRS_input,quarter_inch,true
+MIC-01,ToneClip,microphone,75,not_applicable,3.5mm_TRS_output,not_applicable,true
+MIC-02,AirMic Kit,microphone,90,not_applicable,3.5mm_TRS_output,not_applicable,true
+TRI-01,StandMini,tripod,70,not_applicable,not_applicable,quarter_inch,true
+LGT-01,GlowMini,light,75,not_applicable,not_applicable,standalone,true
+CARD-01,Card64,storage,70,not_applicable,not_applicable,not_applicable,true
