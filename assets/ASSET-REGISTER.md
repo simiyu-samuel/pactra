@@ -11,7 +11,7 @@
 | Architecture diagrams | Embedded Mermaid in docs | Original diagrams, editable with the plan |
 | Logo and favicon | Not created | Develop original vector mark after the brand direction is reviewed |
 | Product illustrations | Not created | Prefer simple original illustrations or text product cards for fictional equipment |
-| Application screenshots | Not created | Capture only from the functioning implementation |
+| Application screenshots | Created in `previews/` | Desktop/mobile captures from the running first build; no live AI/payment outcome is represented |
 | Demo video and narration | Not created | Record the working build; no copyrighted background music |
 
 The MIT license covers original Pactra materials. Third-party SDKs, fonts, provider branding, and future media retain their respective licenses; record provenance when actually added. No third-party logo pack, scraped product image, paid asset, or generated screenshot is bundled in this planning pack.

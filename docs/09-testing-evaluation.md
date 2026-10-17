@@ -75,4 +75,4 @@ Pixel Port's Nova M2 kit cannot meet $430 and four-day delivery: minimum eligibl
 
 ## Final release check
 
-Run relevant domain/integration tests, one complete browser journey with actual sandbox approval, one real webhook/reconciliation check, privacy/access tests, and the core mobile/keyboard review on the candidate release. Test a clean setup separately. After those pass, repeat checks only for changed behavior or unresolved failures. No application tests are executed during this planning-only task.
+Run relevant domain/integration tests, one complete browser journey with actual sandbox approval, one real webhook/reconciliation check, privacy/access tests, and the core mobile/keyboard review on the candidate release. Test a clean setup separately. After those pass, repeat checks only for changed behavior or unresolved failures. Executed checks are recorded in [implementation status](15-implementation-status.md); this document also includes required future release checks.

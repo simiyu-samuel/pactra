@@ -4,7 +4,7 @@
 
 Pactra is a marketplace experience where a buyer's AI negotiates with seller agents over price, bundles, delivery, and supported terms. The buyer watches the offers evolve, changes their priorities, and chooses a deal. PayPal completes the approved transaction.
 
-**Project status:** planning complete; application implementation has not started. This repository contains specifications and planning assets, not a runnable application. No services have been provisioned and no payment or model credentials are included.
+**Project status:** first implementation available. The web app, database, worker, negotiation rules, and provider adapters are implemented. Live Groq and PayPal checks still require local credentials; the full hackathon release is not complete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
 
 ## The experience we are building
 
@@ -31,6 +31,24 @@ The distinguishing feature is **negotiation over several terms with enforceable 
 | Internal submission target | November 11, 2026, 21:00 Africa/Nairobi |
 
 The product name and Groq provider were selected by the user. Other implementation choices are planning defaults for a complete hackathon build. AI usage targets the Groq free tier; account-specific limits are verified in M0, and paid inference is not an automatic fallback.
+
+## Run locally
+
+Prerequisites: Node.js 22+, pnpm 10.34.7, and PostgreSQL 18 (or Docker Compose). If pnpm is not installed, use `npx --yes pnpm@10.34.7` in its place, for example `npx --yes pnpm@10.34.7 install`.
+
+1. Run `pnpm install` and copy `.env.example` to `.env.local` in the repository root. Fill the Groq and PayPal sandbox fields locally; never commit the populated file.
+2. Start PostgreSQL with `docker compose up -d db`, or use an existing local instance and update `DATABASE_URL`.
+3. Run `pnpm db:generate`, `pnpm db:migrate`, and `pnpm db:seed`.
+4. Run `pnpm dev` to start the web app and the negotiation/reconciliation worker.
+5. Open [Pactra locally](http://localhost:3100). Without provider credentials, the product/catalog preview works and live operations display their setup requirements.
+
+The local UI origin defaults to `http://localhost:3100`; update `PUBLIC_APP_URL` if using another origin. The demo database listens on localhost port 55439 in the supplied Compose configuration. Existing fixture stock/policy edits are preserved by seeding.
+
+For web-only development, run `pnpm --filter @pactra/web dev`; live negotiation also needs `pnpm --filter @pactra/worker dev` in another terminal. Run `pnpm typecheck`, `pnpm test`, and `pnpm build` for the ordinary checks.
+
+Integration tests require a **separate database named `pactra_test`**: create it, apply the migration and seed with `DATABASE_URL` pointing to that database, then run `DATABASE_URL=... TEST_DATABASE_URL=... pnpm test:integration`. These tests clear their isolated fixture data and refuse another database name. For browser checks run `pnpm test:e2e`; install the Playwright Chromium browser first if no system Chromium is available. Browser checks do not spend Groq quota or initiate payments.
+
+Register an externally reachable HTTPS `/api/webhooks/paypal` endpoint and set `PAYPAL_WEBHOOK_ID` before validating actual webhook delivery. Use sandbox merchant and buyer accounts. All accepted payment amounts come from server-owned snapshots; the browser never supplies the payable total.
 
 ## Read the plan
 
@@ -62,10 +80,10 @@ The product name and Groq provider were selected by the user. Other implementati
 - [Asset register](assets/ASSET-REGISTER.md): provenance and assets still to create.
 - [Supplied hackathon brief](assets/references/hackathon-brief.txt): archived user-provided overview.
 
-## Start implementation when requested
+## Continue implementation
 
-Start with milestone M0 in the [roadmap](docs/08-build-roadmap.md). First prove one end-to-end sandbox payment and the catalog's feasibility; then build the negotiation engine and agent loop. Screens, code scaffolding, dependencies, cloud resources, and account setup belong to the next phase.
+Use the [implementation status](docs/15-implementation-status.md) together with the [roadmap](docs/08-build-roadmap.md). Complete live-provider validation and the remaining acceptance criteria before calling the release hackathon-ready.
 
 ## Repository status
 
-Git is initialized locally on `main`. No remote repository or initial commit is created as part of this planning task. The license is [MIT](LICENSE).
+Source repository: [simiyu-samuel/pactra](https://github.com/simiyu-samuel/pactra). Original project materials are licensed under [MIT](LICENSE). Local credentials, dependencies, build output, and database files are ignored.

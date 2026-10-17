@@ -1,6 +1,6 @@
 # Groq AI implementation plan
 
-Provider decision: user-confirmed on October 17, 2026. Planning only; no credentials, inference calls, paid resources, or application code have been created.
+Provider decision: user-confirmed on October 17, 2026. The Groq adapter and bounded negotiation worker are implemented; live account checks remain pending. See [implementation status](15-implementation-status.md).
 
 ## Baseline
 

@@ -52,6 +52,6 @@ Groq-hosted `openai/gpt-oss-20b` is the initial model. Its model publisher prefi
 - One sandbox business account receives every demo purchase; no real payout/settlement or shipment occurs.
 - Every purchase requires a human choice and official PayPal approval.
 - AI uses the Groq free tier, with a $0 inference target and no automatic paid fallback. Three agent identities do not imply three simultaneous provider requests.
-- No app code, live model experiment, provider account changes, hosting resources, or public submission has been created by this planning task.
+- The first application build and local verification are recorded in [implementation status](15-implementation-status.md). Live model/payment checks, cloud deployment, and public hackathon submission are not yet claimed.
 
 These assumptions make the build concrete. They should be updated when the user steers the implementation, not treated as established external facts.

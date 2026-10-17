@@ -81,7 +81,7 @@ pactra/
   infra/                      deployment configuration added during implementation
 ```
 
-Only the planning documents and assets exist now. The application directories above are a proposed layout, not implemented modules.
+The application workspace now exists. This document remains the target architecture; see [implementation status](15-implementation-status.md) for implemented modules, verification, and remaining differences.
 
 ## Durable workflow
 

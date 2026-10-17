@@ -1,6 +1,6 @@
 # Data and API contracts
 
-This is a logical schema and contract specification. No database schema, migrations, or HTTP handlers have been implemented.
+This is the target logical schema and contract specification. The first database migration and HTTP handlers now exist; not every planned entity or owner route has shipped. See [implementation status](15-implementation-status.md) and the source schema for the current implementation.
 
 ## Conventions
 

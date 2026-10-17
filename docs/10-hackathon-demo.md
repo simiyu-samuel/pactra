@@ -68,4 +68,4 @@ Groq free-tier quota pacing and payment approval can make the full journey longe
 - [ ] All links, repository visibility, demo access, and video visibility are checked after submission.
 - [ ] Submission is completed by the internal November 11 target; final event cutoff from supplied brief is November 12, 23:00 EAT.
 
-No public repository, demo deployment, video upload, or submission has been created in this planning phase.
+The public [source repository](https://github.com/simiyu-samuel/pactra) is connected. A hosted deployment, video upload, and hackathon submission are still pending.

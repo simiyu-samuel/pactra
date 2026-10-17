@@ -1,0 +1,17 @@
+{
+  "name": "@pactra/database",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "dotenv": "18.0.8"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate deploy"
+  },
+  "devDependencies": {
+    "prisma": "6.19.3"
+  }
+}

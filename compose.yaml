@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: pactra
+      POSTGRES_PASSWORD: pactra
+      POSTGRES_DB: pactra
+    ports:
+      - "127.0.0.1:55439:5432"
+    volumes:
+      - pactra_postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pactra -d pactra"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  pactra_postgres:

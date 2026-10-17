@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model BrowserSession {
+  id String @id @default(uuid())
+  tokenHash String @unique
+  expiresAt DateTime
+  rooms ShoppingSession[]
+}
+model ShoppingSession {
+  id String @id @default(uuid())
+  ownerId String
+  owner BrowserSession @relation(fields: [ownerId], references: [id])
+  brief Json
+  version Int @default(1)
+  state String @default("queued")
+  nextSeq Int @default(0)
+  createdAt DateTime @default(now())
+  offers Offer[]
+  events RoomEvent[]
+  checkouts Checkout[]
+  jobs Job[]
+  @@index([ownerId])
+}
+model Seller {
+  id String @id
+  name String
+  strategy String
+  policyVersion Int @default(1)
+  warrantyMonths Int
+  standardCents Int
+  standardDays Int
+  expressCents Int
+  expressDays Int
+  listings Listing[]
+  offers Offer[]
+}
+model Product {
+  id String @id
+  name String
+  role String
+  score Int
+  video String
+  audio String
+  mount String
+  listings Listing[]
+}
+model Listing {
+  id String @id
+  sellerId String
+  seller Seller @relation(fields: [sellerId], references: [id])
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+  listCents Int
+  floorCents Int
+  onHand Int
+  reserved Int @default(0)
+  reservations Reservation[]
+}
+model Offer {
+  id String @id @default(uuid())
+  roomId String
+  room ShoppingSession @relation(fields: [roomId], references: [id])
+  sellerId String
+  seller Seller @relation(fields: [sellerId], references: [id])
+  briefVersion Int
+  policyVersion Int
+  round Int
+  terms Json
+  status String @default("active")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  checkouts Checkout[]
+  @@index([roomId, briefVersion, status])
+}
+model RoomEvent {
+  id String @id @default(uuid())
+  roomId String
+  room ShoppingSession @relation(fields: [roomId], references: [id])
+  sequence Int
+  type String
+  data Json
+  createdAt DateTime @default(now())
+  @@unique([roomId, sequence])
+}
+model Job {
+  id String @id @default(uuid())
+  key String @unique
+  roomId String
+  room ShoppingSession @relation(fields: [roomId], references: [id])
+  briefVersion Int
+  step Int @default(0)
+  checkpoint Json @default("{}")
+  state String @default("ready")
+  runAt DateTime @default(now())
+  leaseUntil DateTime?
+  startedAt DateTime?
+  calls Int @default(0)
+  error String?
+  @@index([state, runAt])
+}
+model Checkout {
+  id String @id @default(uuid())
+  roomId String
+  room ShoppingSession @relation(fields: [roomId], references: [id])
+  offerId String
+  offer Offer @relation(fields: [offerId], references: [id])
+  commandKey String @unique
+  snapshot Json
+  snapshotHash String
+  totalCents Int
+  state String @default("reserved")
+  paypalOrderId String? @unique
+  captureId String? @unique
+  createKey String @default(uuid())
+  captureKey String @default(uuid())
+  operationAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  reservations Reservation[]
+  paymentEvents PaymentEvent[]
+  @@index([state, updatedAt])
+}
+model Reservation {
+  id String @id @default(uuid())
+  checkoutId String
+  checkout Checkout @relation(fields: [checkoutId], references: [id])
+  listingId String
+  listing Listing @relation(fields: [listingId], references: [id])
+  quantity Int
+  state String @default("held")
+  @@unique([checkoutId, listingId])
+}
+model PaymentEvent {
+  id String @id
+  checkoutId String?
+  checkout Checkout? @relation(fields: [checkoutId], references: [id])
+  type String
+  body Json
+  verified Boolean @default(false)
+  processed Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+model AiUsage {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  estimatedTokens Int
+  actualTokens Int?
+  finished Boolean @default(false)
+  @@index([createdAt])
+}
+model ProviderState {
+  id String @id
+  cooldownUntil DateTime?
+}
