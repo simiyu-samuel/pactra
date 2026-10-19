@@ -19,3 +19,5 @@ The MIT license covers original Pactra materials. Third-party SDKs, fonts, provi
 Seller console screenshots in `assets/previews/pactra-seller-console-*.jpg` are original browser captures of the local isolated test market, October 19, 2026. They show fictional fixture policy values and test-only instructions.
 
 The marketplace includes adapted Channel3 UI product-card and format/variant helpers from [channel3-ai/channel3-ui](https://github.com/channel3-ai/channel3-ui), MIT licensed. Its license is retained in `apps/web/src/components/channel3/LICENSE.channel3-ui`. Imports and styling were adapted for the existing Pactra workspace. Channel3 product photographs are loaded from provider-supplied image URLs; they are not bundled as original assets. Marketplace screenshots under `assets/previews/pactra-marketplace-*.jpg` are browser captures, with retailer captures showing time-specific external provider data.
+
+`previews/pactra-negotiation-allowance.jpg` is an original local browser capture showing the configurable allowance on the creator-kit form. No negotiation was started to capture it.

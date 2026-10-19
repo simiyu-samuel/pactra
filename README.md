@@ -60,6 +60,12 @@ After migrations, run `pnpm verify:providers` for an explicit live connectivity 
 
 Register an externally reachable HTTPS `/api/webhooks/paypal` endpoint and set `PAYPAL_WEBHOOK_ID` before validating actual webhook delivery. Use sandbox merchant and buyer accounts. All accepted payment amounts come from server-owned snapshots; the browser never supplies the payable total.
 
+## Negotiation allowance
+
+The default demo limit is three new negotiation rooms per browser in a rolling 24-hour window. Every newly created room counts, including failed or unfinished ones. Reopening a room and retrying the same creation command use no extra slot. The negotiation page shows remaining slots, the next available time when exhausted, and links to this browser’s recent rooms.
+
+Set `NEGOTIATIONS_PER_BROWSER_PER_DAY` to an integer from 1 to 100 in the server environment and restart the web service to change the cap. Keep the default for a public demo; local testing can use 50. This does not change Groq’s shared request/token limits or provider cooldowns. Admission is serialized per browser so simultaneous requests cannot exceed the configured cap.
+
 ## Seller workspace
 
 Run `pnpm setup:owner` once to generate a strong owner access code in the ignored `.env.local` file. The command preserves an existing valid code and never prints it. Restart the web server, open `/seller-console`, and copy `OWNER_LOGIN_SECRET` from your local file into the sign-in form. Do not share or commit the code.

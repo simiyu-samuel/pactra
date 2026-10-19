@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
 import { briefSchema, constraints, utility, RuleError, type OfferTerms } from '@pactra/domain';
-import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product } from '@pactra/integrations';
+import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance } from '@pactra/integrations';
 import { z } from 'zod';
 import { ownerApi } from '../../../server/owner-api';
 
@@ -55,7 +55,7 @@ async function dispatch(req: NextRequest, path: string[]) {
       existing = await db.browserSession.create({ data: { tokenHash: hash(token), expiresAt: new Date(Date.now() + 86_400_000) } });
     }
     const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true, name: true, strategy: true, warrantyMonths: true, standardDays: true, expressDays: true, listings: { select: { id: true, listCents: true, onHand: true, reserved: true, product: true } } } });
-    const response = ok({ sellers: sellers.map(s => ({ ...s, listings: s.listings.map(({ onHand, reserved, ...l }) => ({ ...l, available: onHand - reserved })) })), capabilities: { groq: Boolean(process.env.GROQ_API_KEY), paypal: paymentConfigured(), channel3: Boolean(process.env.CHANNEL3_API_KEY), model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b' } });
+    const response = ok({ negotiationAllowance: await negotiationAllowance(existing.id), sellers: sellers.map(s => ({ ...s, listings: s.listings.map(({ onHand, reserved, ...l }) => ({ ...l, available: onHand - reserved })) })), capabilities: { groq: Boolean(process.env.GROQ_API_KEY), paypal: paymentConfigured(), channel3: Boolean(process.env.CHANNEL3_API_KEY), model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b' } });
     response.cookies.set(cookieName, token!, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 86400, path: '/' });
     return response;
   }
@@ -101,20 +101,7 @@ async function dispatch(req: NextRequest, path: string[]) {
     const ownerId = await owner(req);
     if (!process.env.GROQ_API_KEY) throw new RuleError('GROQ_NOT_CONFIGURED', 'Live negotiation needs a Groq key on the server.', 503);
     const input = z.object({ brief: briefSchema, commandKey: z.uuid() }).parse(await body(req));
-    const existing = await db.shoppingSession.findUnique({ where: { id: input.commandKey } });
-    if (existing) {
-      if (existing.ownerId !== ownerId || JSON.stringify(existing.brief) !== JSON.stringify(input.brief)) throw new RuleError('COMMAND_CONFLICT', 'This command key is already in use.');
-      return ok(existing);
-    }
-    const recent = await db.shoppingSession.count({ where: { ownerId, createdAt: { gt: new Date(Date.now() - 86_400_000) } } });
-    if (recent >= 3) throw new RuleError('SESSION_LIMIT', 'This browser has reached its daily negotiation allowance.', 429);
-    const room = await db.$transaction(async tx => {
-      const created = await tx.shoppingSession.create({ data: { id: input.commandKey, ownerId, brief: json(input.brief) } });
-      await recordBrief(tx, created.id, 1, input.brief);
-      await tx.job.create({ data: { key: `${created.id}:1`, roomId: created.id, briefVersion: 1 } });
-      await event(tx, created.id, 'brief.confirmed', { message: 'Your brief is confirmed. Seller agents will respond using their own policies.' });
-      return created;
-    });
+    const room = await createNegotiation(ownerId, input.brief, input.commandKey);
     return ok(room, 201);
   }
   if (resource === 'shopping-sessions' && id) {

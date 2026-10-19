@@ -16,6 +16,10 @@ The owner approved a consumer marketplace with native sellers, Channel3 retail d
 
 Flights and the exact-product external benchmark feature remain subsequent phases. Native goods and merchants remain fictional; external results do not enter native PayPal checkout. Earlier sandbox capture/webhook release gaps still apply.
 
+## Negotiation allowance usability
+
+The former hard-coded three-room limit is now configurable through `NEGOTIATIONS_PER_BROWSER_PER_DAY` (default 3, valid 1–100). This machine uses 50 for development; no existing rooms or payment records were removed. The negotiation page shows usage and a rolling reset time, with owned recent-room links for continuing without creating a room. Per-browser admission now locks the browser session while counting and creating, and retries preserve their original room/job. Groq shared provider quotas still apply. Verification: all 47 backend tests, strict TypeScript and the optimized production build passed. Production HTTP checks confirmed the configured allowance and preserved access guards. The existing browser showed 47 of 50 remaining and its three owned recent rooms. The local worker had stopped; restarting it resumed the queued room and produced three offers.
+
 ## Implemented in the first build
 
 - Pinned pnpm/TypeScript workspace with Next.js web app, Node worker, shared domain rules, Prisma/PostgreSQL data layer, and Groq/PayPal integrations.
@@ -61,7 +65,7 @@ No live-money access, automated unattended payment, physical fulfillment, real m
 
 ## Current UI paths and API
 
-The application supports `/`, `/rooms/:id`, and `/checkout/:id`. Receipts are the paid state of the same immutable checkout page. Server APIs are implemented in the Next.js catch-all route; the protected `/seller-console` and `/api/owner/*` routes are implemented. A distinct receipt route is not yet shipped.
+The application supports `/`, `/negotiate`, `/rooms/:id`, and `/checkout/:id`. Receipts are the paid state of the same immutable checkout page. Server APIs are implemented in the Next.js catch-all route; the protected `/seller-console` and `/api/owner/*` routes are implemented. A distinct receipt route is not yet shipped.
 
 The optional AI brief reader returns a draft for the user to confirm. Live negotiation is disabled when Groq is not configured; checkout reservation is disabled until PayPal is configured. There is no prerecorded live AI or fake paid-result fallback. Default run explanations are computed factual summaries; an additional explanation-model call is not necessary in this first build.
 
