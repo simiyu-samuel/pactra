@@ -1,6 +1,6 @@
 import { db, event, json, lockRoom, lockSeller, type Tx } from '@pactra/database';
 import { briefSchema, constraints, decisionSchema, makeOffer, sellerDecisionJson, type Brief, type OfferTerms } from '@pactra/domain';
-import { decide, QuotaWait, reconcileCheckout, ensureOrder, cancelCheckout } from '@pactra/integrations';
+import { decide, QuotaWait, reconcileCheckout, ensureOrder, expireCheckout, processPaymentEvent } from '@pactra/integrations';
 
 type Work = NonNullable<Awaited<ReturnType<typeof claim>>>;
 type Counters = { counters: Array<{ sellerId: string; targetCents: number; message: string }> };
@@ -80,13 +80,17 @@ async function step(job: Work) {
 }
 
 async function maintenance() {
+  await processPaymentEvent();
   const old = await db.checkout.findFirst({ where: { state: { in: ['creating_order', 'capturing', 'pending', 'reconciling'] }, updatedAt: { lt: new Date(Date.now() - 45_000) } }, orderBy: { updatedAt: 'asc' } });
   if (old) {
     try { if (!old.paypalOrderId) await ensureOrder(old.id); else await reconcileCheckout(old.id); }
     catch { await db.checkout.update({ where: { id: old.id }, data: { updatedAt: new Date() } }); console.warn('Payment reconciliation requires retry', old.id); }
   }
-  const expired = await db.checkout.findFirst({ where: { state: { in: ['reserved', 'awaiting_approval'] }, expiresAt: { lt: new Date() } } });
-  if (expired) await cancelCheckout(expired.id, undefined, true);
+  const expired = await db.checkout.findFirst({ where: { state: { in: ['reserved', 'awaiting_approval'] }, expiresAt: { lt: new Date() }, updatedAt: { lt: new Date(Date.now() - 45_000) } } });
+  if (expired) {
+    try { await expireCheckout(expired.id); }
+    catch { await db.checkout.update({ where: { id: expired.id }, data: { updatedAt: new Date() } }); console.warn('Expired approval requires provider retry', expired.id); }
+  }
 }
 
 console.log('Pactra worker ready. Groq free-tier scheduling; sandbox payment recovery enabled.');

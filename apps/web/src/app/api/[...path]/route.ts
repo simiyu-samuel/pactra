@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
 import { briefSchema, constraints, utility, RuleError, type OfferTerms } from '@pactra/domain';
-import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, duffelConfigured, searchFlights, refreshFlight } from '@pactra/integrations';
+import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, duffelConfigured, searchFlights, refreshFlight, receivePayPalWebhook } from '@pactra/integrations';
 import { z } from 'zod';
 import { ownerApi } from '../../../server/owner-api';
 
@@ -61,22 +61,7 @@ async function dispatch(req: NextRequest, path: string[]) {
   }
   if (req.method === 'GET' && resource === 'flights' && id === 'config' && !action) return ok({ configured: duffelConfigured(), mode: 'test' });
   if (req.method === 'POST' && resource === 'webhooks' && id === 'paypal') {
-    const payload = z.object({ id: z.string(), event_type: z.string(), resource: z.record(z.string(), z.unknown()) }).passthrough().parse(await body(req));
-    await verifyWebhook(req.headers, payload);
-    const stored = await db.paymentEvent.upsert({ where: { id: payload.id }, create: { id: payload.id, type: payload.event_type, body: json(payload), verified: true }, update: {} });
-    if (!stored.processed) {
-      const related = payload.resource.supplementary_data as { related_ids?: { order_id?: string; capture_id?: string } } | undefined;
-      const orderId = related?.related_ids?.order_id;
-      const captureId = related?.related_ids?.capture_id || String(payload.resource.id || '');
-      const checkout = await db.checkout.findFirst({ where: { OR: [...(orderId ? [{ paypalOrderId: orderId }] : []), { captureId }] } });
-      if (checkout) {
-        await reconcileCheckout(checkout.id);
-        if (['PAYMENT.CAPTURE.REFUNDED', 'PAYMENT.CAPTURE.REVERSED'].includes(payload.event_type) && checkout.captureId === captureId) {
-          await db.checkout.update({ where: { id: checkout.id }, data: { state: payload.event_type.endsWith('REFUNDED') ? 'refunded' : 'reversed' } });
-        }
-        await db.paymentEvent.update({ where: { id: payload.id }, data: { checkoutId: checkout.id, processed: true } });
-      } else await db.paymentEvent.update({ where: { id: payload.id }, data: { processed: true } });
-    }
+    await receivePayPalWebhook(req.headers, await body(req));
     return ok({ received: true });
   }
   if (req.method === 'POST') csrf(req);

@@ -25,3 +25,5 @@ The marketplace includes adapted Channel3 UI product-card and format/variant hel
 Flight screenshots in `previews/pactra-flights-*.jpg` are original local browser captures from October 19, 2026. They show clearly labeled fictional itineraries and invented airlines/prices, not Duffel provider inventory or bookable fares. The flight interface uses native CSS/SVG and the existing icon set.
 
 `previews/pactra-duffel-test-*.jpg` captures actual provider test responses in the local production app on October 19, 2026, including successful refresh and two-fare comparison. All displayed fares are Duffel test data and are not evidence of real availability or bookable prices.
+
+`previews/pactra-payment-*-fixture.jpg` contains original browser captures of synthetic receipt UI records in the isolated test database. The `UI-FIXTURE-NO-PAYPAL-*` references and fictional camera label deliberately identify display fixtures. These screenshots are not real PayPal transactions, captures, refunds or reversals. The test records were removed after desktop/mobile verification.

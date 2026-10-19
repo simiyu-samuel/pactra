@@ -11,3 +11,5 @@ export type { Product, ProductOffer, ProductImage, Price, OptionValue, Variants,
 export { createNegotiation, negotiationAllowance, negotiationLimit } from './negotiations';
 export { searchFlights, refreshFlight } from './flights';
 export { duffelConfigured } from './duffel';
+
+export { receivePayPalWebhook, processPaymentEvent } from './webhooks';

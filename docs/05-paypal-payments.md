@@ -116,3 +116,13 @@ Reordered events never blindly downgrade a completed capture to pending. Record 
 ## Payment completion gate
 
 Before feature freeze, demonstrate: an actual sandbox capture, matching ledger/snapshot, duplicate capture protection, verified webhook intake, recovery from an uncertain response, concurrent last-item reservations, and correct pending/cancelled states. Payment completion is central to the judged project, not a mocked final button.
+
+## Implemented recovery update — October 19
+
+The webhook route now verifies the signature and persists the notification before acknowledgment. The worker drains the durable inbox with a 45-second lease, per-claim fencing, twelve-attempt limit and exponential retry delay (five seconds initially, up to one hour). Duplicate deliveries preserve the first body. Unmapped or conflicting references remain unprocessed with a safe error code; unsupported event types are recorded without payment effects. `pnpm status:payments` reads queue/state summaries without exposing provider bodies or credentials.
+
+Order retrieval is authoritative for approval/capture reconciliation. Completed capture amounts, currencies and identities are checked separately from the order total. A known capture ID cannot silently change. Full `REFUNDED` capture evidence preserves the original capture and refunded receipt, including when refund evidence precedes local completion. Refund/reversal notifications must identify the known capture and full USD amount; partial or unconfirmed returns require review. Reversal takes precedence over refund when events are reordered. Confirmed receipts cannot be overwritten by stale pending or mismatched retrievals. No return automatically restocks inventory.
+
+Before expiring an approval with a remote order ID, the worker retrieves its current state. Pending or unavailable payment evidence retains the hold; a confirmed completion consumes it once. The original create/capture request keys survive uncertain responses. The current implementation uses the checkout's durable keys, state and operation timestamp rather than a separate operation table.
+
+Verification: 85 backend tests passed, with real PostgreSQL and stubbed provider responses, including nineteen recovery tests and five additional capture-evidence cases. Actual sandbox buyer approval/capture and external HTTPS signature delivery remain separate release gates. The owner console does not yet offer payment-case resolution or dead-inbox retry controls; inspect and resolve these cases against PayPal evidence before deliberately requeuing an identified event.

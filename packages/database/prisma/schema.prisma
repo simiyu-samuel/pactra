@@ -153,7 +153,12 @@ model PaymentEvent {
   body Json
   verified Boolean @default(false)
   processed Boolean @default(false)
+  attempts Int @default(0)
+  nextAttemptAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)"))
+  leaseUntil DateTime?
+  errorCode String?
   createdAt DateTime @default(now())
+  @@index([processed, nextAttemptAt])
 }
 model AiUsage {
   id String @id @default(uuid())

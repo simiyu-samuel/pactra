@@ -58,6 +58,8 @@ For external discovery, configure `CHANNEL3_API_KEY` in `.env.local` and restart
 
 After migrations, run `pnpm verify:providers` for an explicit live connectivity check. It uses one Groq request through the shared quota scheduler and authenticates PayPal sandbox without creating or capturing a payment. It does not verify the merchant recipient, buyer approval, capture, or webhook delivery.
 
+Keep the worker running for verified webhook processing and payment recovery. `pnpm status:payments` prints a read-only summary of checkout states and pending inbox IDs, without webhook bodies or credentials. Verified notifications are acknowledged after durable intake, then retried with a lease/backoff; items that reach twelve attempts require operator review.
+
 Register an externally reachable HTTPS `/api/webhooks/paypal` endpoint and set `PAYPAL_WEBHOOK_ID` before validating actual webhook delivery. Use sandbox merchant and buyer accounts. All accepted payment amounts come from server-owned snapshots; the browser never supplies the payable total.
 
 ## Flight discovery

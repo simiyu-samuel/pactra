@@ -24,3 +24,17 @@ describe('provider evidence matches the exact accepted agreement', () => {
     expect(verifyOrder(result, checkout, true)).toBeNull();
   });
 });
+
+it.each(['amount', 'currency', 'identity', 'multiple'])('rejects completed capture %s mismatches instead of treating them as pending', changed => {
+  process.env.PAYPAL_EXPECTED_MERCHANT_ID = 'MERCHANT-1'; const result = order(); const captures = result.purchase_units![0].payments!.captures!;
+  if (changed === 'amount') captures[0].amount.value = '1.00';
+  if (changed === 'currency') captures[0].amount.currency_code = 'EUR';
+  if (changed === 'identity') captures[0].id = '';
+  if (changed === 'multiple') captures.push({ ...captures[0], id: 'CAPTURE-2' });
+  expect(() => verifyOrder(result, checkout, true)).toThrow('Capture amount or identity');
+});
+
+it('routes an unknown capture state to review rather than treating it as an unpaid approval', () => {
+  process.env.PAYPAL_EXPECTED_MERCHANT_ID = 'MERCHANT-1'; const result = order(); result.purchase_units![0].payments!.captures![0].status = 'UNRECOGNIZED';
+  expect(() => verifyOrder(result, checkout, true)).toThrow('unsupported capture state');
+});

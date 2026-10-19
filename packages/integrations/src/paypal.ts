@@ -39,7 +39,7 @@ export async function createOrder(checkout: { id: string; snapshotHash: string; 
 export const getOrder = (id: string) => request<PayPalOrder>(`/v2/checkout/orders/${encodeURIComponent(id)}`);
 export const captureOrder = (id: string, key: string) => request<PayPalOrder>(`/v2/checkout/orders/${encodeURIComponent(id)}/capture`, 'POST', {}, key);
 
-export function verifyOrder(order: PayPalOrder, checkout: { id: string; snapshotHash: string; totalCents: number; paypalOrderId?: string | null }, requireCapture = false) {
+export function verifyOrder(order: PayPalOrder, checkout: { id: string; snapshotHash: string; totalCents: number; paypalOrderId?: string | null; captureId?: string | null }, requireCapture = false) {
   const units = order.purchase_units;
   if (checkout.paypalOrderId && order.id !== checkout.paypalOrderId) throw new RuleError('PAYMENT_MISMATCH', 'Payment order does not match the accepted agreement.');
   if (units?.length !== 1) throw new RuleError('PAYMENT_MISMATCH', 'Payment purchase units do not match the agreement.');
@@ -47,7 +47,11 @@ export function verifyOrder(order: PayPalOrder, checkout: { id: string; snapshot
   if (unit.reference_id !== checkout.id || unit.custom_id !== checkout.snapshotHash || unit.payee?.merchant_id !== process.env.PAYPAL_EXPECTED_MERCHANT_ID || unit.amount?.currency_code !== 'USD' || unit.amount.value !== (checkout.totalCents / 100).toFixed(2)) throw new RuleError('PAYMENT_MISMATCH', 'Payment amount, recipient, or reference does not match the agreement.');
   if (!requireCapture) return null;
   const captures = unit.payments?.captures;
-  if (captures?.length !== 1 || captures[0].status !== 'COMPLETED' || captures[0].amount.currency_code !== 'USD' || captures[0].amount.value !== (checkout.totalCents / 100).toFixed(2)) return null;
+  if (!captures?.length) return null;
+  if (captures.length !== 1 || !captures[0].id || checkout.captureId && captures[0].id !== checkout.captureId || captures[0].amount?.currency_code !== 'USD' || captures[0].amount?.value !== (checkout.totalCents / 100).toFixed(2)) throw new RuleError('PAYMENT_MISMATCH', 'Capture amount or identity does not match the accepted agreement.');
+  if (!['COMPLETED', 'REFUNDED', 'PARTIALLY_REFUNDED', 'PENDING', 'DECLINED', 'FAILED'].includes(captures[0].status)) throw new RuleError('PAYMENT_REVIEW_REQUIRED', 'The provider returned an unsupported capture state.');
+  if (captures[0].status === 'PARTIALLY_REFUNDED') throw new RuleError('PAYMENT_REVIEW_REQUIRED', 'A partial refund requires owner review.');
+  if (!['COMPLETED', 'REFUNDED'].includes(captures[0].status)) return null;
   return captures[0];
 }
 

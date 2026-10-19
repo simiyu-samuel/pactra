@@ -97,13 +97,20 @@ export async function reconcileCheckout(id: string) {
   let capture;
   try { capture = verifyOrder(order, checkout, true); }
   catch (error) {
-    await db.checkout.update({ where: { id }, data: { state: 'review_required' } });
+    await db.checkout.updateMany({ where: { id, state: { notIn: error instanceof RuleError && error.code === 'PAYMENT_REVIEW_REQUIRED' ? ['refunded', 'reversed'] : ['paid', 'refunded', 'reversed'] } }, data: { state: 'review_required' } });
     throw error;
   }
   return db.$transaction(async tx => {
     await lockCheckout(tx, id);
     const current = await tx.checkout.findUniqueOrThrow({ where: { id } });
-    if (['paid', 'refunded', 'reversed'].includes(current.state)) return current;
+    if (['paid', 'refunded', 'reversed'].includes(current.state)) {
+      if (current.state === 'paid' && capture?.status === 'REFUNDED') {
+        const refunded = await tx.checkout.update({ where: { id }, data: { state: 'refunded' } });
+        await event(tx, current.roomId, 'payment.refunded', { checkoutId: id });
+        return refunded;
+      }
+      return current;
+    }
     if (capture) {
       if (['cancelled', 'expired', 'failed'].includes(current.state)) {
         await event(tx, current.roomId, 'inventory.exception', { checkoutId: id, message: 'Late payment requires owner review.' });
@@ -115,11 +122,18 @@ export async function reconcileCheckout(id: string) {
         await tx.listing.update({ where: { id: hold.listingId }, data: { onHand: { decrement: hold.quantity }, reserved: { decrement: hold.quantity } } });
         await tx.reservation.update({ where: { id: hold.id }, data: { state: 'consumed' } });
       }
-      const paid = await tx.checkout.update({ where: { id }, data: { state: 'paid', captureId: capture.id, operationAt: null } });
-      await event(tx, current.roomId, 'payment.completed', { checkoutId: id });
+      const paid = await tx.checkout.update({ where: { id }, data: { state: capture.status === 'REFUNDED' ? 'refunded' : 'paid', captureId: capture.id, operationAt: null } });
+      await event(tx, current.roomId, capture.status === 'REFUNDED' ? 'payment.refunded' : 'payment.completed', { checkoutId: id });
       return paid;
     }
     const captures = order.purchase_units?.flatMap(x => x.payments?.captures || []) || [];
+    if (['cancelled', 'expired', 'failed'].includes(current.state)) {
+      if (captures.some(x => x.status === 'PENDING')) {
+        await event(tx, current.roomId, 'inventory.exception', { checkoutId: id, message: 'Late pending payment requires owner review.' });
+        return tx.checkout.update({ where: { id }, data: { state: 'review_required' } });
+      }
+      return current;
+    }
     if (captures.some(x => x.status === 'DECLINED' || x.status === 'FAILED')) {
       await release(tx, id);
       return tx.checkout.update({ where: { id }, data: { state: 'failed', operationAt: null } });
@@ -132,7 +146,7 @@ export async function reconcileCheckout(id: string) {
 
 export async function payCheckout(id: string) {
   let c = await reconcileCheckout(id);
-  if (c.state === 'paid') return c;
+  if (['paid', 'refunded', 'reversed'].includes(c.state)) return c;
   c = await db.$transaction(async tx => {
     await lockCheckout(tx, id);
     const checkout = await tx.checkout.findUniqueOrThrow({ where: { id } });
@@ -148,4 +162,13 @@ export async function payCheckout(id: string) {
     await db.checkout.updateMany({ where: { id, state: 'capturing' }, data: { state: 'reconciling' } });
     throw error;
   }
+}
+
+/** Check remote evidence before releasing a timed-out approval reservation. */
+export async function expireCheckout(id: string) {
+  const current = await db.checkout.findUniqueOrThrow({ where: { id } });
+  if (+current.expiresAt > Date.now() || !['reserved', 'awaiting_approval'].includes(current.state)) return current;
+  const checked = current.paypalOrderId ? await reconcileCheckout(id) : current;
+  if (!['reserved', 'awaiting_approval'].includes(checked.state)) return checked;
+  return cancelCheckout(id, undefined, true);
 }
