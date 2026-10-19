@@ -23,3 +23,5 @@ The marketplace includes adapted Channel3 UI product-card and format/variant hel
 `previews/pactra-negotiation-allowance.jpg` is an original local browser capture showing the configurable allowance on the creator-kit form. No negotiation was started to capture it.
 
 Flight screenshots in `previews/pactra-flights-*.jpg` are original local browser captures from October 19, 2026. They show clearly labeled fictional itineraries and invented airlines/prices, not Duffel provider inventory or bookable fares. The flight interface uses native CSS/SVG and the existing icon set.
+
+`previews/pactra-duffel-test-*.jpg` captures actual provider test responses in the local production app on October 19, 2026, including successful refresh and two-fare comparison. All displayed fares are Duffel test data and are not evidence of real availability or bookable prices.

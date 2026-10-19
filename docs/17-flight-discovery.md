@@ -32,6 +32,10 @@ No airline bookings, passenger details, ticket issuance, live charges, PayPal co
 - Desktop/mobile search and comparison walkthrough using the fictional example; live Duffel test check only after the locally configured token is present.
 - Hosted access, provider terms/account billing, real inventory, exact merchant handoff integration and live fare claims remain later release work.
 
+## Connected provider verification
+
+October 19, 2026: configured a local test token and restarted the production web process. The explicit verification script returned 12 retained LHR–JFK one-way offers with no failed dates. A browser search for two adults NBO–DXB, November 18–25 with ±1-day flexibility, returned 36 retained test offers across November 17/18/19 departures; return dates shifted together. Nonstop filtering returned three offers. The two-fare comparison and selected-offer refresh succeeded; browser logs contained no warnings/errors. Four search calls and one refresh were used. No booking, payment or live inventory claim was tested or enabled.
+
 ## References checked
 
 - https://duffel.com/docs/guides/getting-started-with-flights
