@@ -4,7 +4,7 @@
 
 Pactra is a marketplace experience where a buyer's AI negotiates with seller agents over price, bundles, delivery, and supported terms. The buyer watches the offers evolve, changes their priorities, and chooses a deal. PayPal completes the approved transaction.
 
-**Project status:** first implementation available. The web app, database, worker, negotiation rules, and provider adapters are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
+**Project status:** first implementation available. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
 
 ## The experience we are building
 
@@ -51,6 +51,14 @@ Integration tests require a **separate database named `pactra_test`**: create it
 After migrations, run `pnpm verify:providers` for an explicit live connectivity check. It uses one Groq request through the shared quota scheduler and authenticates PayPal sandbox without creating or capturing a payment. It does not verify the merchant recipient, buyer approval, capture, or webhook delivery.
 
 Register an externally reachable HTTPS `/api/webhooks/paypal` endpoint and set `PAYPAL_WEBHOOK_ID` before validating actual webhook delivery. Use sandbox merchant and buyer accounts. All accepted payment amounts come from server-owned snapshots; the browser never supplies the payable total.
+
+## Seller workspace
+
+Run `pnpm setup:owner` once to generate a strong owner access code in the ignored `.env.local` file. The command preserves an existing valid code and never prints it. Restart the web server, open `/seller-console`, and copy `OWNER_LOGIN_SECRET` from your local file into the sign-in form. Do not share or commit the code.
+
+The workspace controls each fictional seller's strategy, private instructions, minimum prices, total stock, shipping, and warranty. Publishing requires a change note and creates a new immutable policy version. Private instructions and floors stay behind separate owner authentication. Existing reservations keep their accepted snapshot; unlocked old-policy offers become ineligible. Reload a draft if another edit, stock movement, or reservation conflicts with it. Owner sessions expire after four hours, sign-out revokes them, and changing the configured access code invalidates existing sessions.
+
+New buyer briefs retain every confirmed revision; rooms show their brief history after revision. New checkouts reference their original brief and seller policy records. The migration captures available current values from older data; it cannot reconstruct earlier values that had already been overwritten.
 
 ## Read the plan
 

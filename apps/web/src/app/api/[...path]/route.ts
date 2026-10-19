@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
 import { briefSchema, constraints, utility, RuleError, type OfferTerms } from '@pactra/domain';
-import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait } from '@pactra/integrations';
+import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief } from '@pactra/integrations';
 import { z } from 'zod';
+import { ownerApi } from '../../../server/owner-api';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -78,6 +79,7 @@ async function dispatch(req: NextRequest, path: string[]) {
     return ok({ received: true });
   }
   if (req.method === 'POST') csrf(req);
+  if (resource === 'owner') return ownerApi(req, path.slice(1), () => body(req));
   if (resource === 'briefs' && id === 'interpret' && req.method === 'POST') {
     await owner(req);
     const { text } = z.object({ text: z.string().min(10).max(1500) }).parse(await body(req));
@@ -98,6 +100,7 @@ async function dispatch(req: NextRequest, path: string[]) {
     if (recent >= 3) throw new RuleError('SESSION_LIMIT', 'This browser has reached its daily negotiation allowance.', 429);
     const room = await db.$transaction(async tx => {
       const created = await tx.shoppingSession.create({ data: { id: input.commandKey, ownerId, brief: json(input.brief) } });
+      await recordBrief(tx, created.id, 1, input.brief);
       await tx.job.create({ data: { key: `${created.id}:1`, roomId: created.id, briefVersion: 1 } });
       await event(tx, created.id, 'brief.confirmed', { message: 'Your brief is confirmed. Seller agents will respond using their own policies.' });
       return created;
@@ -137,9 +140,11 @@ async function dispatch(req: NextRequest, path: string[]) {
         const current = await tx.shoppingSession.findUniqueOrThrow({ where: { id } });
         if (current.version !== input.expectedVersion || current.version >= 2) throw new RuleError('REVISION_LIMIT', 'This brief changed already. Start a fresh room for another revision.');
         if (await tx.checkout.findFirst({ where: { roomId: id, state: { in: [...unresolvedStates, 'paid', 'refunded', 'reversed'] } } })) throw new RuleError('CHECKOUT_LOCKED', 'Resolve your checkout before revising the brief.');
+        await recordBrief(tx, id, current.version, current.brief, 'current_baseline');
         await tx.offer.updateMany({ where: { roomId: id, status: 'active' }, data: { status: 'superseded' } });
         await tx.job.updateMany({ where: { roomId: id, state: { in: ['ready', 'running'] } }, data: { state: 'cancelled', leaseUntil: null } });
         const result = await tx.shoppingSession.update({ where: { id }, data: { version: { increment: 1 }, brief: json(input.brief), state: 'queued' } });
+        await recordBrief(tx, id, result.version, input.brief);
         await tx.job.create({ data: { key: `${id}:${result.version}`, roomId: id, briefVersion: result.version } });
         await event(tx, id, 'brief.revised', { message: 'Brief updated. Old offers cannot be selected for the new requirements.' });
         return result;
@@ -160,7 +165,8 @@ async function dispatch(req: NextRequest, path: string[]) {
       }).sort((a, b) => b.score - a.score || a.terms.totalCents - b.terms.totalCents || a.id.localeCompare(b.id));
       const events = await db.roomEvent.findMany({ where: { roomId: id }, orderBy: { sequence: 'desc' }, take: 40 });
       const checkouts = await db.checkout.findMany({ where: { roomId: id }, select: { id: true, state: true, totalCents: true }, orderBy: { createdAt: 'desc' } });
-      return ok({ ...room, offers: projected, events: events.reverse(), checkouts });
+      const briefHistory = await db.buyerBriefVersion.findMany({ where: { roomId: id }, orderBy: { version: 'asc' }, select: { version: true, brief: true, createdAt: true, source: true } });
+      return ok({ ...room, offers: projected, events: events.reverse(), checkouts, briefHistory });
     }
   }
   if (resource === 'checkouts' && !id && req.method === 'POST') {
@@ -190,7 +196,7 @@ async function handle(req: NextRequest, context: { params: Promise<{ path: strin
   catch (error) {
     const correlationId = randomUUID();
     if (error instanceof QuotaWait) return NextResponse.json({ error: { code: 'PROVIDER_WAIT', message: error.message, correlationId } }, { status: 429, headers: { 'Retry-After': String(Math.ceil(error.retryMs / 1000)) } });
-    if (error instanceof z.ZodError) return ok({ error: { code: 'INVALID_INPUT', message: 'Check your budget, deadline and required fields.', correlationId } }, 400);
+    if (error instanceof z.ZodError) return ok({ error: { code: 'INVALID_INPUT', message: 'Check the required fields and allowed values.', correlationId } }, 400);
     if (error instanceof RuleError) return ok({ error: { code: error.code, message: error.message, correlationId } }, error.status);
     console.error('Pactra request failed', correlationId, (error as { code?: string }).code || 'INTERNAL');
     return ok({ error: { code: 'UNAVAILABLE', message: 'Pactra could not complete this request. Check the database and server configuration.', correlationId } }, 503);

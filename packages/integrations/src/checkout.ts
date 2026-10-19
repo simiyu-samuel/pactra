@@ -1,12 +1,13 @@
 import { randomUUID, createHash } from 'node:crypto';
-import { db, event, json, lockCheckout, lockRoom, type Tx } from '@pactra/database';
+import { db, event, json, lockCheckout, lockRoom, lockSeller, type Tx } from '@pactra/database';
 import { briefSchema, constraints, makeOffer, RuleError, type OfferTerms } from '@pactra/domain';
+import { ensurePolicyVersion, recordBrief } from './policies';
 import { createOrder, getOrder, captureOrder, verifyOrder } from './paypal';
 
 export const unresolvedStates = ['reserved', 'creating_order', 'awaiting_approval', 'capturing', 'pending', 'reconciling', 'review_required'];
 export async function acceptOffer(ownerId: string, offerId: string, commandKey: string) {
   return db.$transaction(async tx => {
-    const offer = await tx.offer.findUnique({ where: { id: offerId }, include: { room: true, seller: { include: { listings: { include: { product: true } } } } } });
+    const offer = await tx.offer.findUnique({ where: { id: offerId }, include: { room: true } });
     if (!offer || offer.room.ownerId !== ownerId) throw new RuleError('NOT_FOUND', 'Offer not found.', 404);
     await lockRoom(tx, offer.roomId);
     const room = await tx.shoppingSession.findUniqueOrThrow({ where: { id: offer.roomId } });
@@ -16,16 +17,20 @@ export async function acceptOffer(ownerId: string, offerId: string, commandKey: 
       return existing;
     }
     if (await tx.checkout.findFirst({ where: { roomId: room.id, state: { notIn: ['cancelled', 'expired', 'failed'] } } })) throw new RuleError('CHECKOUT_LOCKED', 'Resolve the existing checkout before making another selection.');
-    if (offer.status !== 'active' || offer.briefVersion !== room.version || offer.policyVersion !== offer.seller.policyVersion || +offer.expiresAt < Date.now()) throw new RuleError('STALE_OFFER', 'This offer has expired or changed. Negotiate a fresh offer.');
+    await lockSeller(tx, offer.sellerId);
+    const seller = await tx.seller.findUniqueOrThrow({ where: { id: offer.sellerId } });
+    if (offer.status !== 'active' || offer.briefVersion !== room.version || offer.policyVersion !== seller.policyVersion || +offer.expiresAt < Date.now()) throw new RuleError('STALE_OFFER', 'This offer has expired or changed. Negotiate a fresh offer.');
     const terms = offer.terms as unknown as OfferTerms;
     for (const item of [...terms.items].sort((a, b) => a.listingId.localeCompare(b.listingId))) {
       await tx.$queryRaw`SELECT id FROM "Listing" WHERE id = ${item.listingId} FOR UPDATE`;
     }
     const listings = await tx.listing.findMany({ where: { sellerId: offer.sellerId }, include: { product: true } });
-    const checked = makeOffer({ action: 'offer', items: terms.items.map(x => ({ listingId: x.listingId, quantity: x.quantity, unitPriceCents: x.unitPriceCents })), shipping: terms.shipping, message: terms.message }, offer.seller, listings.map(x => ({ ...x, available: x.onHand - x.reserved })));
+    const checked = makeOffer({ action: 'offer', items: terms.items.map(x => ({ listingId: x.listingId, quantity: x.quantity, unitPriceCents: x.unitPriceCents })), shipping: terms.shipping, message: terms.message }, seller, listings.map(x => ({ ...x, available: x.onHand - x.reserved })));
     if (!checked || constraints(checked, briefSchema.parse(room.brief)).length || checked.totalCents !== terms.totalCents) throw new RuleError('INELIGIBLE_OFFER', 'The offer no longer meets your requirements or stock availability.');
-    const snapshot = { terms: checked, seller: { id: offer.seller.id, name: offer.seller.name, policyVersion: offer.policyVersion }, briefVersion: room.version, offerId: offer.id, merchantId: process.env.PAYPAL_EXPECTED_MERCHANT_ID || null, disclosures: 'Fictional products and delivery; PayPal sandbox only.' };
-    const checkout = await tx.checkout.create({ data: { id: randomUUID(), roomId: room.id, offerId, commandKey, snapshot: json(snapshot), snapshotHash: createHash('sha256').update(JSON.stringify(snapshot)).digest('hex'), totalCents: checked.totalCents, expiresAt: new Date(Date.now() + 600_000) } });
+    const policyVersion = await ensurePolicyVersion(tx, seller.id);
+    const briefVersion = await recordBrief(tx, room.id, room.version, room.brief, 'current_baseline');
+    const snapshot = { brief: room.brief, terms: checked, seller: { id: seller.id, name: seller.name, policyVersion: offer.policyVersion }, briefVersion: room.version, offerId: offer.id, merchantId: process.env.PAYPAL_EXPECTED_MERCHANT_ID || null, disclosures: 'Fictional products and delivery; PayPal sandbox only.' };
+    const checkout = await tx.checkout.create({ data: { id: randomUUID(), roomId: room.id, offerId, commandKey, buyerBriefVersionId: briefVersion.id, sellerPolicyVersionId: policyVersion.id, snapshot: json(snapshot), snapshotHash: createHash('sha256').update(JSON.stringify(snapshot)).digest('hex'), totalCents: checked.totalCents, expiresAt: new Date(Date.now() + 600_000) } });
     for (const item of checked.items) {
       await tx.listing.update({ where: { id: item.listingId }, data: { reserved: { increment: item.quantity } } });
       await tx.reservation.create({ data: { checkoutId: checkout.id, listingId: item.listingId, quantity: item.quantity } });

@@ -24,12 +24,14 @@ model ShoppingSession {
   events RoomEvent[]
   checkouts Checkout[]
   jobs Job[]
+  briefVersions BuyerBriefVersion[]
   @@index([ownerId])
 }
 model Seller {
   id String @id
   name String
   strategy String
+  privateInstructions String @default("")
   policyVersion Int @default(1)
   warrantyMonths Int
   standardCents Int
@@ -38,6 +40,7 @@ model Seller {
   expressDays Int
   listings Listing[]
   offers Offer[]
+  policyVersions SellerPolicyVersion[]
 }
 model Product {
   id String @id
@@ -111,6 +114,10 @@ model Checkout {
   offer Offer @relation(fields: [offerId], references: [id])
   commandKey String @unique
   snapshot Json
+  buyerBriefVersionId String?
+  buyerBriefVersion BuyerBriefVersion? @relation(fields: [buyerBriefVersionId], references: [id], onDelete: Restrict)
+  sellerPolicyVersionId String?
+  sellerPolicyVersion SellerPolicyVersion? @relation(fields: [sellerPolicyVersionId], references: [id], onDelete: Restrict)
   snapshotHash String
   totalCents Int
   state String @default("reserved")
@@ -157,4 +164,42 @@ model AiUsage {
 model ProviderState {
   id String @id
   cooldownUntil DateTime?
+}
+
+model OwnerSession {
+  id String @id @default(uuid())
+  tokenHash String @unique
+  credentialDigest String
+  expiresAt DateTime
+}
+model OwnerLoginWindow {
+  id String @id
+  startedAt DateTime
+  attempts Int
+}
+model BuyerBriefVersion {
+  id String @id @default(uuid())
+  roomId String
+  room ShoppingSession @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  version Int
+  brief Json
+  source String
+  createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)"))
+  checkouts Checkout[]
+  @@unique([roomId, version])
+}
+model SellerPolicyVersion {
+  id String @id @default(uuid())
+  sellerId String
+  seller Seller @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  version Int
+  snapshot Json
+  source String
+  note String
+  publishedBy String?
+  commandKey String? @unique
+  requestHash String?
+  createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)"))
+  checkouts Checkout[]
+  @@unique([sellerId, version])
 }

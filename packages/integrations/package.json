@@ -6,6 +6,7 @@
   "dependencies": {
     "groq-sdk": "1.6.0",
     "@pactra/domain": "workspace:*",
-    "@pactra/database": "workspace:*"
+    "@pactra/database": "workspace:*",
+    "zod": "4.6.7"
   }
 }

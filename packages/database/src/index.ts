@@ -32,3 +32,7 @@ export async function lockRoom(tx: Tx, roomId: string) {
 export async function lockCheckout(tx: Tx, id: string) {
   await tx.$queryRaw`SELECT id FROM "Checkout" WHERE id = ${id} FOR UPDATE`;
 }
+
+export async function lockSeller(tx: Tx, id: string) {
+  await tx.$queryRaw`SELECT id FROM "Seller" WHERE id = ${id} FOR UPDATE`;
+}

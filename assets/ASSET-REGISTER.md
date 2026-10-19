@@ -15,3 +15,5 @@
 | Demo video and narration | Not created | Record the working build; no copyrighted background music |
 
 The MIT license covers original Pactra materials. Third-party SDKs, fonts, provider branding, and future media retain their respective licenses; record provenance when actually added. No third-party logo pack, scraped product image, paid asset, or generated screenshot is bundled in this planning pack.
+
+Seller console screenshots in `assets/previews/pactra-seller-console-*.jpg` are original browser captures of the local isolated test market, October 19, 2026. They show fictional fixture policy values and test-only instructions.
