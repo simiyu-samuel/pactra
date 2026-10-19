@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
 import { briefSchema, constraints, utility, RuleError, type OfferTerms } from '@pactra/domain';
-import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance } from '@pactra/integrations';
+import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, duffelConfigured, searchFlights, refreshFlight } from '@pactra/integrations';
 import { z } from 'zod';
 import { ownerApi } from '../../../server/owner-api';
 
@@ -59,6 +59,7 @@ async function dispatch(req: NextRequest, path: string[]) {
     response.cookies.set(cookieName, token!, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 86400, path: '/' });
     return response;
   }
+  if (req.method === 'GET' && resource === 'flights' && id === 'config' && !action) return ok({ configured: duffelConfigured(), mode: 'test' });
   if (req.method === 'POST' && resource === 'webhooks' && id === 'paypal') {
     const payload = z.object({ id: z.string(), event_type: z.string(), resource: z.record(z.string(), z.unknown()) }).passthrough().parse(await body(req));
     await verifyWebhook(req.headers, payload);
@@ -80,6 +81,12 @@ async function dispatch(req: NextRequest, path: string[]) {
   }
   if (req.method === 'POST') csrf(req);
   if (resource === 'owner') return ownerApi(req, path.slice(1), () => body(req));
+  if (resource === 'flights' && id === 'search' && !action && req.method === 'POST') return ok(await searchFlights(await owner(req), await body(req)));
+  if (resource === 'flights' && id === 'refresh' && !action && req.method === 'POST') {
+    const ownerId = await owner(req);
+    const input = z.object({ searchId: z.uuid(), offerId: z.string().regex(/^off_[A-Za-z0-9_-]+$/).max(120) }).strict().parse(await body(req));
+    return ok(await refreshFlight(ownerId, input.searchId, input.offerId));
+  }
   if (resource === 'discovery' && id === 'product' && !action && req.method === 'POST') {
     const ownerId = await owner(req);
     const input = z.object({ productId: z.string().min(1).max(120) }).parse(await body(req));

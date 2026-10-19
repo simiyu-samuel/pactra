@@ -10,3 +10,5 @@
 /* Readable supporting text at normal storefront scale. */
 .merchant{font-size:11px;color:#82718c}.productDescription{font-size:11px;color:#86758f}.stock{font-size:10px;color:#7d6a88}.productActions>a,.productActions>button:first-child{font-size:11px}.resultToolbar>p{font-size:11px;color:#82718d}.sourceDetail{font-size:10px;color:#81718e}.howGrid p{color:#83728e}.footer p small{color:#83718e}.categoryHint{color:#84748e}.resultToolbar label{color:#7a6a86}
 @media(max-width:600px){.merchant{font-size:10px}.productDescription{font-size:10px}.stock{font-size:9px}.productActions>a,.productActions>button:first-child{font-size:10px}.resultToolbar>p{font-size:10px}}
+
+.flightCategory{display:flex;align-items:center;gap:8px;font-size:11px;padding:11px 17px;background:#fff;border:1px solid #e9e6eb;border-radius:7px;color:#897294;white-space:nowrap}@media(max-width:600px){.flightCategory{font-size:10px;gap:5px;padding:10px 11px}.flightCategory svg{width:14px}}

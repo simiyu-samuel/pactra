@@ -77,3 +77,5 @@ export const sellerDecisionJson = {
 };
 
 export type { DiscoverySource, MarketOffer, DiscoveryResult } from './discovery';
+export { flightSearchSchema, shiftedFlightDates, durationMinutes } from './flights';
+export type { FlightQuery, FlightSegment, FlightLeg, FlightOffer, FlightResult } from './flights';

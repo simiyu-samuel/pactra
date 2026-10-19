@@ -17,7 +17,8 @@
     "test:e2e": "playwright test",
     "verify:providers": "tsx scripts/verify-providers.ts",
     "setup:owner": "node scripts/setup-owner.mjs",
-    "verify:discovery": "tsx scripts/verify-discovery.ts"
+    "verify:discovery": "tsx scripts/verify-discovery.ts",
+    "verify:flights": "tsx scripts/verify-flights.ts"
   },
   "devDependencies": {
     "tsx": "4.23.15",

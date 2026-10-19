@@ -14,11 +14,19 @@ The owner approved a consumer marketplace with native sellers, Channel3 retail d
 - Browser walkthrough verified native category filtering, product details, two-item comparison, source switching, real Channel3 results, current merchant links, and return navigation from `/negotiate`. Desktop and 390px mobile layouts were inspected without document horizontal overflow. Existing kit preference controls still work.
 - Latest regression suite: 42 backend tests passed, including six source/URL normalization tests and five real-PostgreSQL cache, ownership, quota and recovery tests. Strict TypeScript passed. The optimized production build passed, including Next.js TypeScript validation and route generation. Production HTTP checks passed storefront/native routes, public redaction, guest ownership, forged-origin rejection, invalid input and foreign product refresh rejection, without provider calls. A fresh browser tab rendered the production storefront; the old development tab needed replacing after the server restart.
 
-Flights and the exact-product external benchmark feature remain subsequent phases. Native goods and merchants remain fictional; external results do not enter native PayPal checkout. Earlier sandbox capture/webhook release gaps still apply.
+The exact-product external benchmark feature remains a subsequent phase. Flight discovery is described below. Native goods and merchants remain fictional; external results do not enter native PayPal checkout. Earlier sandbox capture/webhook release gaps still apply.
 
 ## Negotiation allowance usability
 
 The former hard-coded three-room limit is now configurable through `NEGOTIATIONS_PER_BROWSER_PER_DAY` (default 3, valid 1–100). This machine uses 50 for development; no existing rooms or payment records were removed. The negotiation page shows usage and a rolling reset time, with owned recent-room links for continuing without creating a room. Per-browser admission now locks the browser session while counting and creating, and retries preserve their original room/job. Groq shared provider quotas still apply. Verification: all 47 backend tests, strict TypeScript and the optimized production build passed. Production HTTP checks confirmed the configured allowance and preserved access guards. The existing browser showed 47 of 50 remaining and its three owned recent rooms. The local worker had stopped; restarting it resumed the queued room and produced three offers.
+
+## Flight discovery and comparison
+
+Added `/flights` with one-way/return search, one to six adults, cabin/connection controls, optional ±1-day comparison, fare filters, a three-fare shortlist, and itinerary details. A test-only Duffel v2 adapter normalizes operator names, airport-local times, all-traveller totals, baggage and known fare permissions. Selected provider offers are refreshed with itinerary checks; expired offers cannot appear current. A durable owned search ledger enforces atomic provider admission, short-lived caching and refresh accounting. The additive migration is applied to local development and isolated test databases. See [document 17](17-flight-discovery.md).
+
+All 61 backend tests passed, including 14 flight tests for validation, normalization, real-PostgreSQL quota admission, caching, ownership, partial failures, refresh pacing and changed itineraries. Provider calls were stubbed in automated tests. Desktop and 390px mobile browser walkthroughs verified fictional example search, two-person return totals, nonstop/baggage filters, two-fare comparison and detail disclosures without document horizontal overflow. Strict TypeScript and the optimized production build passed. Production HTTP checks passed storefront/flight/negotiation readiness, public config redaction, missing-session and forged-origin rejection, invalid trip rejection, foreign refresh rejection and explicit missing-provider behavior without external calls. The rebuilt production flight page rendered the two-person return example correctly.
+
+`DUFFEL_ACCESS_TOKEN` is not yet configured, so actual Duffel connectivity remains unverified. The UI provides an explicitly fictional example and disables provider search until a test token is configured. No airline booking, ticket payment, live availability claim or exact merchant booking handoff is included. Copying route/dates and opening KAYAK starts separate research; it transfers no fare or reservation.
 
 ## Implemented in the first build
 
@@ -65,7 +73,7 @@ No live-money access, automated unattended payment, physical fulfillment, real m
 
 ## Current UI paths and API
 
-The application supports `/`, `/negotiate`, `/rooms/:id`, and `/checkout/:id`. Receipts are the paid state of the same immutable checkout page. Server APIs are implemented in the Next.js catch-all route; the protected `/seller-console` and `/api/owner/*` routes are implemented. A distinct receipt route is not yet shipped.
+The application supports `/`, `/flights`, `/negotiate`, `/rooms/:id`, and `/checkout/:id`. Receipts are the paid state of the same immutable checkout page. Server APIs are implemented in the Next.js catch-all route; the protected `/seller-console` and `/api/owner/*` routes are implemented. A distinct receipt route is not yet shipped.
 
 The optional AI brief reader returns a draft for the user to confirm. Live negotiation is disabled when Groq is not configured; checkout reservation is disabled until PayPal is configured. There is no prerecorded live AI or fake paid-result fallback. Default run explanations are computed factual summaries; an additional explanation-model call is not necessary in this first build.
 

@@ -59,7 +59,7 @@ Configure CHANNEL3_API_KEY locally. Hackathon offer: promo PAYPAL-HACKATHON-2026
 
 1. **Storefront and discovery:** root shopping UI, native detail view, Channel3 adapter, selected-domain web search, comparison and safe handoffs. Checks: no invented prices/URLs, secrets absent from public responses, malicious URLs rejected, missing sources handled, desktop/mobile usability, preserved negotiation routes. Live Channel3 verification requires the configured key.
 2. **Deal benchmark:** “Can Pactra beat this deal?” only after real native inventory can match external model, variant, condition, quantity and total-cost basis. Current fictional inventory cannot establish real external savings. Validate benchmark evidence server-side; seller policy floors and buyer approval remain mandatory.
-3. **Travel:** integrate a dedicated flight search provider; compare dates, airports, baggage and fare terms with fresh pricing and booking handoff. No airline fare bargaining, fabricated routes, or production ticket issuance in the current slice.
+3. **Travel:** the first test-mode implementation is defined in [flight discovery](17-flight-discovery.md); integrate a dedicated flight search provider; compare dates, airports, baggage and fare terms with fresh pricing and booking handoff. No airline fare bargaining, fabricated routes, or production ticket issuance in the current slice.
 4. **Release:** complete sandbox buyer approval/capture, public HTTPS webhooks, provider failure checks, abuse/retention hardening, hosting, accessibility review and under-three-minute video. Discovery does not replace the PayPal-centered demo.
 
 ## Demo story

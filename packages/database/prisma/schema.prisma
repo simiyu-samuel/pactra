@@ -11,6 +11,7 @@ model BrowserSession {
   expiresAt DateTime
   rooms ShoppingSession[]
   searches DiscoverySearch[]
+  flightSearches FlightSearch[]
 }
 model ShoppingSession {
   id String @id @default(uuid())
@@ -216,4 +217,20 @@ model DiscoverySearch {
   createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)"))
   @@index([ownerId, createdAt])
   @@index([source, createdAt])
+}
+
+model FlightSearch {
+  id String @id @default(uuid())
+  ownerId String
+  owner BrowserSession @relation(fields: [ownerId], references: [id])
+  query Json
+  queryHash String
+  state String @default("running")
+  calls Int
+  refreshes Int @default(0)
+  lastRefreshAt DateTime?
+  result Json?
+  createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)"))
+  @@index([ownerId, queryHash, createdAt])
+  @@index([createdAt])
 }

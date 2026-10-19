@@ -60,6 +60,14 @@ After migrations, run `pnpm verify:providers` for an explicit live connectivity 
 
 Register an externally reachable HTTPS `/api/webhooks/paypal` endpoint and set `PAYPAL_WEBHOOK_ID` before validating actual webhook delivery. Use sandbox merchant and buyer accounts. All accepted payment amounts come from server-owned snapshots; the browser never supplies the payable total.
 
+## Flight discovery
+
+Open `/flights` from the marketplace. Compare one-way/return itineraries, nearby dates, all-traveller totals, stops, travel time, baggage and reported fare permissions. **Preview an example** works without credentials and explicitly shows fictional itineraries.
+
+For provider checks, create a Duffel **test** token and set `DUFFEL_ACCESS_TOKEN` in `.env.local`, then restart the web service. This slice accepts only tokens beginning `duffel_test_` and independently rejects live-mode responses. The default `DUFFEL_DAILY_CALL_LIMIT=100` counts allocated searches and refreshes; a flexible-date search allocates up to three provider calls. No provider calls happen on page load.
+
+`pnpm verify:flights` explicitly performs one test-mode search. Fares can be refreshed from an owned search, but flights cannot be booked or paid for. KAYAK handoff opens its general flight-search page; no fare or reservation transfers. See [flight discovery scope](docs/17-flight-discovery.md).
+
 ## Negotiation allowance
 
 The default demo limit is three new negotiation rooms per browser in a rolling 24-hour window. Every newly created room counts, including failed or unfinished ones. Reopening a room and retrying the same creation command use no extra slot. The negotiation page shows remaining slots, the next available time when exhausted, and links to this browser’s recent rooms.
