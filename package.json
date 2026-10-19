@@ -14,7 +14,8 @@
     "db:generate": "node scripts/database.mjs generate",
     "db:migrate": "node scripts/database.mjs migrate deploy",
     "db:seed": "tsx scripts/seed.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "verify:providers": "tsx scripts/verify-providers.ts"
   },
   "devDependencies": {
     "tsx": "4.23.15",

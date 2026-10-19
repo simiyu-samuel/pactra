@@ -7,7 +7,7 @@ const limit = (key: string, fallback: number) => Math.max(1, Number(process.env[
 
 async function reserve(estimatedTokens: number) {
   return db.$transaction(async tx => {
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(71934021)`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(71934021)`;
     const now = Date.now();
     const provider = await tx.providerState.findUnique({ where: { id: 'groq' } });
     if (provider?.cooldownUntil && +provider.cooldownUntil > now) throw new QuotaWait(+provider.cooldownUntil - now);

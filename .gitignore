@@ -9,7 +9,7 @@ Thumbs.db
 
 # Future application output
 node_modules/
-.next/
+.next
 dist/
 build/
 coverage/

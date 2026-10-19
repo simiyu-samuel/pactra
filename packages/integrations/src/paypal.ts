@@ -17,6 +17,9 @@ async function token() {
   return body.access_token;
 }
 
+/** Authenticate against sandbox without creating or capturing a payment. */
+export async function verifyPayPalConnection() { await token(); }
+
 async function request<T>(path: string, method = 'GET', body?: unknown, key?: string): Promise<T> {
   const access = await token();
   const response = await fetch(`${base}${path}`, { method, headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json', ...(key ? { 'PayPal-Request-Id': key } : {}) }, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(20_000) });

@@ -4,7 +4,7 @@
 
 Pactra is a marketplace experience where a buyer's AI negotiates with seller agents over price, bundles, delivery, and supported terms. The buyer watches the offers evolve, changes their priorities, and chooses a deal. PayPal completes the approved transaction.
 
-**Project status:** first implementation available. The web app, database, worker, negotiation rules, and provider adapters are implemented. Live Groq and PayPal checks still require local credentials; the full hackathon release is not complete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
+**Project status:** first implementation available. The web app, database, worker, negotiation rules, and provider adapters are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
 
 ## The experience we are building
 
@@ -48,6 +48,8 @@ For web-only development, run `pnpm --filter @pactra/web dev`; live negotiation 
 
 Integration tests require a **separate database named `pactra_test`**: create it, apply the migration and seed with `DATABASE_URL` pointing to that database, then run `DATABASE_URL=... TEST_DATABASE_URL=... pnpm test:integration`. These tests clear their isolated fixture data and refuse another database name. For browser checks run `pnpm test:e2e`; install the Playwright Chromium browser first if no system Chromium is available. Browser checks do not spend Groq quota or initiate payments.
 
+After migrations, run `pnpm verify:providers` for an explicit live connectivity check. It uses one Groq request through the shared quota scheduler and authenticates PayPal sandbox without creating or capturing a payment. It does not verify the merchant recipient, buyer approval, capture, or webhook delivery.
+
 Register an externally reachable HTTPS `/api/webhooks/paypal` endpoint and set `PAYPAL_WEBHOOK_ID` before validating actual webhook delivery. Use sandbox merchant and buyer accounts. All accepted payment amounts come from server-owned snapshots; the browser never supplies the payable total.
 
 ## Read the plan
@@ -74,7 +76,7 @@ Register an externally reachable HTTPS `/api/webhooks/paypal` endpoint and set `
 
 - [Brand direction](assets/brand/brand-direction.md): positioning, colors, typography, and visual tone.
 - [Demo data guide](assets/demo/README.md): fictional product facts, seller listings, private policies, and expected feasibility.
-- [Products](assets/demo/products.csv), [listings](assets/demo/listings.csv), and [seller policies](assets/demo/seller-policies.csv): planning fixtures; no runtime importer exists yet.
+- [Products](assets/demo/products.csv), [listings](assets/demo/listings.csv), and [seller policies](assets/demo/seller-policies.csv): fictional fixtures imported by `pnpm db:seed`.
 - [Demo scenarios](assets/demo/scenarios.md): happy path, changed budget, impossible demand, and recovery cases.
 - [Negotiation examples](assets/demo/negotiation-examples.md): illustrative decisions for UX and evaluation; not prerecorded live behavior.
 - [Asset register](assets/ASSET-REGISTER.md): provenance and assets still to create.

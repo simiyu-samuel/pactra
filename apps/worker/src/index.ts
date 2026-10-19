@@ -10,7 +10,7 @@ for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { stopping 
 
 async function claim() {
   return db.$transaction(async tx => {
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(71934022)`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(71934022)`;
     if (await tx.job.findFirst({ where: { state: 'running', leaseUntil: { gt: new Date() } } })) return null;
     const current = await tx.job.findFirst({ where: { state: { in: ['ready', 'running'] }, startedAt: { not: null } }, orderBy: { startedAt: 'asc' } });
     const job = current || await tx.job.findFirst({ where: { state: 'ready' }, orderBy: { runAt: 'asc' } });
