@@ -3,10 +3,9 @@ import { expect, test } from '@playwright/test';
 test('the market explains the product and serves only public catalog fields', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Your terms. Negotiated.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Pixel Port' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Studio Stack' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Swift Gear' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Great finds. Better deals.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your next creative chapter.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Pactra sellers', exact: true })).toBeVisible();
   const response = await page.request.get('/api/bootstrap'); expect(response.ok()).toBeTruthy();
   const body = await response.text(); expect(body).not.toContain('floorCents'); expect(body).not.toContain('tokenHash'); expect(body).not.toContain('PAYPAL_CLIENT_SECRET');
   expect(errors).toEqual([]);
@@ -14,7 +13,7 @@ test('the market explains the product and serves only public catalog fields', as
 });
 
 test('the brief can be steered on a narrow mobile screen', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 }); await page.goto('/');
+  await page.setViewportSize({ width: 390, height: 844 }); await page.goto('/negotiate');
   await page.getByRole('button', { name: 'Lowest total' }).click();
   await expect(page.getByRole('button', { name: 'Lowest total' })).toHaveClass(/chosen/);
   await page.getByRole('spinbutton', { name: 'Total budget' }).fill('430');

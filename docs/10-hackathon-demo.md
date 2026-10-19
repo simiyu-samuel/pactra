@@ -1,5 +1,7 @@
 # Hackathon and demo plan
 
+> October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
+
 ## Submission thesis
 
 **Pactra makes an agreement between AI buyer and seller agents visible, enforceable, and payable.**

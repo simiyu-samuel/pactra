@@ -1,0 +1,20 @@
+export type DiscoverySource = 'channel3' | 'jumia' | 'kilimall' | 'amazon';
+export type MarketOffer = {
+  id: string;
+  productId?: string;
+  title: string;
+  description: string;
+  source: DiscoverySource | 'pactra';
+  merchant: string;
+  url: string | null;
+  image: string | null;
+  amount: number | null;
+  currency: string | null;
+  availability: 'in_stock' | 'out_of_stock' | 'unknown';
+  condition: string | null;
+  variants: string[];
+  category: string;
+  observedAt: string;
+  fictional: boolean;
+};
+export type DiscoveryResult = { offers: MarketOffer[]; source: DiscoverySource; observedAt: string; cached: boolean };

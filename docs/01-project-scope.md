@@ -1,5 +1,7 @@
 # Scope and acceptance criteria
 
+> October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
+
 ## Release boundary
 
 P0 is the required hackathon release. P1 improves the submission only after P0 passes. P2 is a future product roadmap and is not promised for November 12.

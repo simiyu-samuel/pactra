@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
 import { briefSchema, constraints, utility, RuleError, type OfferTerms } from '@pactra/domain';
-import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief } from '@pactra/integrations';
+import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, verifyWebhook, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product } from '@pactra/integrations';
 import { z } from 'zod';
 import { ownerApi } from '../../../server/owner-api';
 
@@ -55,7 +55,7 @@ async function dispatch(req: NextRequest, path: string[]) {
       existing = await db.browserSession.create({ data: { tokenHash: hash(token), expiresAt: new Date(Date.now() + 86_400_000) } });
     }
     const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true, name: true, strategy: true, warrantyMonths: true, standardDays: true, expressDays: true, listings: { select: { id: true, listCents: true, onHand: true, reserved: true, product: true } } } });
-    const response = ok({ sellers: sellers.map(s => ({ ...s, listings: s.listings.map(({ onHand, reserved, ...l }) => ({ ...l, available: onHand - reserved })) })), capabilities: { groq: Boolean(process.env.GROQ_API_KEY), paypal: paymentConfigured(), model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b' } });
+    const response = ok({ sellers: sellers.map(s => ({ ...s, listings: s.listings.map(({ onHand, reserved, ...l }) => ({ ...l, available: onHand - reserved })) })), capabilities: { groq: Boolean(process.env.GROQ_API_KEY), paypal: paymentConfigured(), channel3: Boolean(process.env.CHANNEL3_API_KEY), model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b' } });
     response.cookies.set(cookieName, token!, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 86400, path: '/' });
     return response;
   }
@@ -80,6 +80,16 @@ async function dispatch(req: NextRequest, path: string[]) {
   }
   if (req.method === 'POST') csrf(req);
   if (resource === 'owner') return ownerApi(req, path.slice(1), () => body(req));
+  if (resource === 'discovery' && id === 'product' && !action && req.method === 'POST') {
+    const ownerId = await owner(req);
+    const input = z.object({ productId: z.string().min(1).max(120) }).parse(await body(req));
+    return ok(await refreshChannel3Product(ownerId, input.productId));
+  }
+  if (resource === 'discovery' && !id && req.method === 'POST') {
+    const ownerId = await owner(req);
+    const input = z.object({ query: z.string().trim().min(2).max(240), source: z.enum(['channel3', 'jumia', 'kilimall', 'amazon']) }).parse(await body(req));
+    return ok(await discover(ownerId, input.query, input.source));
+  }
   if (resource === 'briefs' && id === 'interpret' && req.method === 'POST') {
     await owner(req);
     const { text } = z.object({ text: z.string().min(10).max(1500) }).parse(await body(req));

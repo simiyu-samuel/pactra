@@ -1,5 +1,7 @@
 # Groq AI implementation plan
 
+> October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
+
 Provider decision: user-confirmed on October 17, 2026. The Groq adapter and bounded negotiation worker are implemented; live account checks remain pending. See [implementation status](15-implementation-status.md).
 
 ## Baseline

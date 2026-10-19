@@ -1,12 +1,16 @@
 # Pactra
 
-**Your terms. Negotiated.**
+**Discover more. Make a better pact.**
 
-Pactra is a marketplace experience where a buyer's AI negotiates with seller agents over price, bundles, delivery, and supported terms. The buyer watches the offers evolve, changes their priorities, and chooses a deal. PayPal completes the approved transaction.
+Pactra combines an owned seller marketplace, Channel3 product discovery, and AI web search with merchant redirects. On Pactra, a buyer's AI negotiates with seller agents over price, bundles, delivery, and supported terms. The buyer watches the offers evolve, changes their priorities, and chooses a deal. PayPal completes the approved transaction.
 
-**Project status:** first implementation available. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
+**Project status:** consumer marketplace and live external discovery implemented; final release validation continues. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
 
-## The experience we are building
+## Approved marketplace direction
+
+See the [approved expansion plan](docs/16-marketplace-expansion.md) for the three discovery paths, consumer storefront, provider boundaries, rollout and acceptance criteria. External offers redirect to their merchant checkout; participating Pactra sellers use the existing negotiated PayPal sandbox flow. The native catalog remains fictional.
+
+## The native negotiation experience
 
 > "Find me a creator camera kit under $500, delivered within four days. Video quality matters more than extras."
 
@@ -19,7 +23,7 @@ The distinguishing feature is **negotiation over several terms with enforceable 
 | Decision | Baseline |
 | --- | --- |
 | Audience | Budget-conscious first-time video creators |
-| Market | Fictional camera and audio equipment; 8 products and 21 seller listings |
+| Market | Native fictional creator equipment plus external product discovery; see approved expansion plan |
 | Sellers | Three simulated storefronts with separate agent context and policies |
 | Checkout | One selected seller's bundle, USD, PayPal sandbox |
 | Merchant arrangement | One platform-owned sandbox business account for all simulated storefronts |
@@ -36,7 +40,7 @@ The product name and Groq provider were selected by the user. Other implementati
 
 Prerequisites: Node.js 22+, pnpm 10.34.7, and PostgreSQL 18 (or Docker Compose). If pnpm is not installed, use `npx --yes pnpm@10.34.7` in its place, for example `npx --yes pnpm@10.34.7 install`.
 
-1. Run `pnpm install` and copy `.env.example` to `.env.local` in the repository root. Fill the Groq and PayPal sandbox fields locally; never commit the populated file.
+1. Run `pnpm install` and copy `.env.example` to `.env.local` in the repository root. Fill the Groq, Channel3 and PayPal sandbox fields locally; never commit the populated file.
 2. Start PostgreSQL with `docker compose up -d db`, or use an existing local instance and update `DATABASE_URL`.
 3. Run `pnpm db:generate`, `pnpm db:migrate`, and `pnpm db:seed`.
 4. Run `pnpm dev` to start the web app and the negotiation/reconciliation worker.
@@ -47,6 +51,10 @@ The local UI origin defaults to `http://localhost:3100`; update `PUBLIC_APP_URL`
 For web-only development, run `pnpm --filter @pactra/web dev`; live negotiation also needs `pnpm --filter @pactra/worker dev` in another terminal. Run `pnpm typecheck`, `pnpm test`, and `pnpm build` for the ordinary checks.
 
 Integration tests require a **separate database named `pactra_test`**: create it, apply the migration and seed with `DATABASE_URL` pointing to that database, then run `DATABASE_URL=... TEST_DATABASE_URL=... pnpm test:integration`. These tests clear their isolated fixture data and refuse another database name. For browser checks run `pnpm test:e2e`; install the Playwright Chromium browser first if no system Chromium is available. Browser checks do not spend Groq quota or initiate payments.
+
+For external discovery, configure `CHANNEL3_API_KEY` in `.env.local` and restart the web service. The Channel3 skill is installed under `.agents/skills/channel3-api`. Open the storefront, choose **Across retailers**, enter a product query and press Search. Jumia/Kilimall/Amazon use explicit Groq web searches and merchant redirects. Channel3 uses US/USD; Kenya delivery is not assumed. No external provider is called on initial load or typing.
+
+`pnpm verify:discovery` explicitly performs one live Channel3 search plus current-product retrievals. Add `-- --web` to also test Jumia through Groq browser search. It uses the shared quota controls and does not initiate a purchase. Provider account limits and tool billing still apply.
 
 After migrations, run `pnpm verify:providers` for an explicit live connectivity check. It uses one Groq request through the shared quota scheduler and authenticates PayPal sandbox without creating or capturing a payment. It does not verify the merchant recipient, buyer approval, capture, or webhook delivery.
 
@@ -64,6 +72,7 @@ New buyer briefs retain every confirmed revision; rooms show their brief history
 
 | Document | What it answers |
 | --- | --- |
+| [Approved marketplace expansion](docs/16-marketplace-expansion.md) | Current product scope, discovery architecture and implementation phases |
 | [Product brief](docs/00-product-brief.md) | Who needs Pactra, why it matters, and what makes it interesting |
 | [Scope and acceptance criteria](docs/01-project-scope.md) | Exactly what ships, what waits, and how we know it works |
 | [Experience and screen plan](docs/02-user-experience.md) | Buyer journey, seller policy console, screens, and error states |

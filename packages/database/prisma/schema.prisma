@@ -10,6 +10,7 @@ model BrowserSession {
   tokenHash String @unique
   expiresAt DateTime
   rooms ShoppingSession[]
+  searches DiscoverySearch[]
 }
 model ShoppingSession {
   id String @id @default(uuid())
@@ -202,4 +203,17 @@ model SellerPolicyVersion {
   createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)"))
   checkouts Checkout[]
   @@unique([sellerId, version])
+}
+
+model DiscoverySearch {
+  id String @id @default(uuid())
+  ownerId String
+  owner BrowserSession @relation(fields: [ownerId], references: [id])
+  query String
+  source String
+  state String @default("running")
+  result Json?
+  createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)"))
+  @@index([ownerId, createdAt])
+  @@index([source, createdAt])
 }

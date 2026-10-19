@@ -1,5 +1,7 @@
 # System architecture
 
+> October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
+
 ## Architectural baseline
 
 Use a TypeScript modular application with two deployable processes: a Next.js web/API service and a Node.js background worker. PostgreSQL is the durable source of truth for catalog data, workflow checkpoints, offers, inventory, payments, and events.
@@ -46,7 +48,7 @@ The reconciliation adapter belongs to the same codebase and runs in the worker; 
 | --- | --- | --- |
 | Language | TypeScript in strict mode | Shared contracts and a small toolchain |
 | UI and server | Next.js App Router on Node.js | One web application for screens and HTTP endpoints |
-| Styling | Tailwind CSS with accessible component primitives | Fast consistent product UI; custom room composition |
+| Styling | CSS modules and scoped styles with accessible native controls | Fast consistent product UI; custom room composition |
 | Data validation | Zod plus database constraints | Validate browser inputs and model proposals at explicit boundaries |
 | Database | PostgreSQL with Prisma for schema and ordinary queries | Relational ownership and transactional inventory/payment records |
 | Job claiming | PostgreSQL jobs table with short transactional claims and leases | Durable execution without another datastore; reviewed SQL where ORM support is insufficient |

@@ -1,5 +1,7 @@
 # Data and API contracts
 
+> October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
+
 This is the target logical schema and contract specification. The first database migration and HTTP handlers now exist; not every planned entity or owner route has shipped. See [implementation status](15-implementation-status.md) and the source schema for the current implementation.
 
 ## Conventions

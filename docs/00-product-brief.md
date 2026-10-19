@@ -1,5 +1,7 @@
 # Product brief
 
+> October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
+
 Status: proposed implementation baseline, October 17, 2026.
 
 ## Product promise

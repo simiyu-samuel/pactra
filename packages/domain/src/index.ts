@@ -75,3 +75,5 @@ export const sellerDecisionJson = {
     items: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['listingId', 'quantity', 'unitPriceCents'], properties: { listingId: { type: 'string' }, quantity: { type: 'integer' }, unitPriceCents: { type: 'integer' } } } },
     shipping: { type: 'string', enum: ['standard', 'express'] }, message: { type: 'string' } },
 };
+
+export type { DiscoverySource, MarketOffer, DiscoveryResult } from './discovery';

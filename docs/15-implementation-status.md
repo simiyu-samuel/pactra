@@ -2,6 +2,20 @@
 
 Updated October 19, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
 
+## October 19 marketplace expansion
+
+The owner approved a consumer marketplace with native sellers, Channel3 retail discovery and Groq marketplace search. [Document 16](16-marketplace-expansion.md) is the current scope baseline.
+
+- Implemented root storefront with product illustrations, categories, search sources, source/price/stock labels, product-detail dialogs, up-to-three-item comparison, retailer cards and original merchant handoffs. Existing creator-kit negotiation moved to `/negotiate`; room/checkout/owner paths remain available.
+- Installed the official Channel3 API skill in `.agents/skills/channel3-api`; integrated pinned official SDK 4.3.0 and adapted official MIT product-card/helper source. Credentials are environment-only.
+- Applied additive discovery-ledger migration to local development and isolated test databases. Owned same-origin requests, per-browser pacing, rolling provider daily caps, ID-only Channel3 caching, fresh product retrieval and safe public HTTPS destinations are implemented.
+- Live Channel3 adapter check: eight products, fourteen merchant offers, images present on all fourteen. The storefront independently rendered fourteen live offers with real images; opening a product refreshed and produced a current attributed merchant link. This verifies discovery, not a purchase or merchant fulfillment.
+- Live Groq browser-search check: eight Jumia Kenya source results. These carry unknown structured price/stock; technical source titles are normalized. Jumia discovery is verified; Kilimall and Amazon use the same domain-restricted adapter but have not had individual live-provider checks in this slice.
+- Browser walkthrough verified native category filtering, product details, two-item comparison, source switching, real Channel3 results, current merchant links, and return navigation from `/negotiate`. Desktop and 390px mobile layouts were inspected without document horizontal overflow. Existing kit preference controls still work.
+- Latest regression suite: 42 backend tests passed, including six source/URL normalization tests and five real-PostgreSQL cache, ownership, quota and recovery tests. Strict TypeScript passed. The optimized production build passed, including Next.js TypeScript validation and route generation. Production HTTP checks passed storefront/native routes, public redaction, guest ownership, forged-origin rejection, invalid input and foreign product refresh rejection, without provider calls. A fresh browser tab rendered the production storefront; the old development tab needed replacing after the server restart.
+
+Flights and the exact-product external benchmark feature remain subsequent phases. Native goods and merchants remain fictional; external results do not enter native PayPal checkout. Earlier sandbox capture/webhook release gaps still apply.
+
 ## Implemented in the first build
 
 - Pinned pnpm/TypeScript workspace with Next.js web app, Node worker, shared domain rules, Prisma/PostgreSQL data layer, and Groq/PayPal integrations.

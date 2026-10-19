@@ -1,5 +1,7 @@
 # Build roadmap and backlog
 
+> October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
+
 Plan date: October 17, 2026. Times and dates use Africa/Nairobi. Capacity assumption: one primary builder, about 108 focused implementation hours plus 20 contingency hours across the remaining calendar window. This is an estimate, not a commitment based on known team availability.
 
 The submitted brief gives November 12, 2026 at 23:00 as the deadline. Target submission on November 11 at 21:00, leaving a day for corrections. Confirm the event's full official rules and submission form before spending the final buffer.
