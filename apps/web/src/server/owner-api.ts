@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@pactra/database';
-import { loginOwner, logoutOwner, requireOwner, ownerConfigured, ownerSessionSeconds, publishPolicy } from '@pactra/integrations';
+import { loginOwner, logoutOwner, requireOwner, ownerConfigured, ownerSessionSeconds, publishPolicy, addSellerProduct } from '@pactra/integrations';
 import { RuleError } from '@pactra/domain';
 import { z } from 'zod';
 
@@ -33,6 +33,7 @@ export async function ownerApi(req: NextRequest, path: string[], readBody: () =>
     const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, include: { listings: { orderBy: { id: 'asc' }, include: { product: true } }, policyVersions: { orderBy: { version: 'desc' }, take: 20, select: { id: true, version: true, note: true, source: true, createdAt: true, snapshot: true } } } });
     return reply({ sellers });
   }
+  if (path.length === 3 && path[0] === 'sellers' && path[2] === 'products' && req.method === 'POST') return reply(await addSellerProduct(path[1], await readBody(), owner.id));
   if (path.length === 3 && path[0] === 'sellers' && path[2] === 'publish' && req.method === 'POST') {
     return reply(await publishPolicy(path[1], await readBody(), owner.id));
   }

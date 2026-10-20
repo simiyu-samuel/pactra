@@ -122,3 +122,9 @@ Events contain session ID, sequence, public event ID, timestamp, brief version, 
 ## Query and indexing plan
 
 Index owner/session lookups, session/version offers, room event sequence, job state/next-run time, lease expiry, listing reservations, checkout status/updated time, and provider order/capture/event IDs. Use bounded pagination for history. Review actual query plans before adding speculative indexes or a cache.
+
+## Current general-product contract — October 20
+
+See [negotiation first](18-negotiation-first.md) for the current scope. New buyer requests include `items: [{productId, quantity}]` alongside budget and delivery limits. Exact products and quantities are checked at admission and checkout. Earlier JSON briefs without `items` retain the original camera-kit contract.
+
+`POST /api/owner/sellers/:id/products` adds a seller product with shop access and the existing same-origin guard. Inputs include a retry key, expected rule version, product name/category/description, asking price, private minimum and stock. The product, listing and new rule-history entry are created together under the seller lock. Public bootstrap exposes product descriptions and asking prices; private minimums and instructions remain excluded. The additive `Product.description` field defaults to an empty string for earlier records.

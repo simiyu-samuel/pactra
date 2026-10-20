@@ -1,5 +1,6 @@
 # Approved marketplace expansion
 
+> Current approved direction (October 20): [Negotiation first](18-negotiation-first.md) makes buyer/seller agent negotiation primary and supports seller-listed products across categories. Earlier creator-only and discovery-led boundaries below are historical.
 Approved by the project owner on October 19, 2026. This document supersedes the original single-category product boundary wherever they conflict. Existing negotiation/payment integrity requirements still apply. Implementation evidence belongs in document 15.
 
 ## Product promise

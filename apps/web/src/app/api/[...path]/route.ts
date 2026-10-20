@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
 import { briefSchema, constraints, utility, RuleError, type OfferTerms } from '@pactra/domain';
-import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, duffelConfigured, searchFlights, refreshFlight, receivePayPalWebhook } from '@pactra/integrations';
+import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, assertProductsAvailable, duffelConfigured, searchFlights, refreshFlight, receivePayPalWebhook } from '@pactra/integrations';
 import { z } from 'zod';
 import { ownerApi } from '../../../server/owner-api';
 
@@ -86,12 +86,12 @@ async function dispatch(req: NextRequest, path: string[]) {
     await owner(req);
     const { text } = z.object({ text: z.string().min(10).max(1500) }).parse(await body(req));
     const schema = { type: 'object', additionalProperties: false, required: ['goal', 'capCents', 'maxDays', 'preference', 'discloseBudget'], properties: { goal: { type: 'string' }, capCents: { type: 'integer' }, maxDays: { type: 'integer' }, preference: { type: 'string', enum: ['quality', 'price'] }, discloseBudget: { type: 'boolean' } } };
-    const draft = await decide('Extract a confirmable shopping brief for a fictional 4K camera, microphone and tripod kit. Do not begin negotiation. Budget is USD cents. Default arrival 4 days and preference quality only when omitted. Missing budget must be 0 so the user must correct it. Do not disclose budget to sellers unless explicitly requested. Preserve unsupported requirements in the goal and never claim support.', { text }, schema);
+    const draft = await decide('Extract budget, arrival and negotiation preferences for a shopping request. Products are selected separately by the buyer; do not choose or invent them. Do not begin negotiation. Budget is USD cents. Default arrival 4 days and preference quality only when omitted. Missing budget must be 0 so the user must correct it. Do not disclose budget to sellers unless explicitly requested. Preserve unsupported requirements in the goal and never claim support.', { text }, schema);
     return ok({ draft });
   }
   if (resource === 'shopping-sessions' && !id && req.method === 'POST') {
     const ownerId = await owner(req);
-    if (!process.env.GROQ_API_KEY) throw new RuleError('GROQ_NOT_CONFIGURED', 'Live negotiation needs a Groq key on the server.', 503);
+    if (!process.env.GROQ_API_KEY) throw new RuleError('GROQ_NOT_CONFIGURED', 'Negotiation is temporarily unavailable. Please try again after setup is complete.', 503);
     const input = z.object({ brief: briefSchema, commandKey: z.uuid() }).parse(await body(req));
     const room = await createNegotiation(ownerId, input.brief, input.commandKey);
     return ok(room, 201);
@@ -129,6 +129,7 @@ async function dispatch(req: NextRequest, path: string[]) {
         const current = await tx.shoppingSession.findUniqueOrThrow({ where: { id } });
         if (current.version !== input.expectedVersion || current.version >= 2) throw new RuleError('REVISION_LIMIT', 'This brief changed already. Start a fresh room for another revision.');
         if (await tx.checkout.findFirst({ where: { roomId: id, state: { in: [...unresolvedStates, 'paid', 'refunded', 'reversed'] } } })) throw new RuleError('CHECKOUT_LOCKED', 'Resolve your checkout before revising the brief.');
+        await assertProductsAvailable(input.brief, tx);
         await recordBrief(tx, id, current.version, current.brief, 'current_baseline');
         await tx.offer.updateMany({ where: { roomId: id, status: 'active' }, data: { status: 'superseded' } });
         await tx.job.updateMany({ where: { roomId: id, state: { in: ['ready', 'running'] } }, data: { state: 'cancelled', leaseUntil: null } });
@@ -184,11 +185,11 @@ async function handle(req: NextRequest, context: { params: Promise<{ path: strin
   try { return await dispatch(req, (await context.params).path); }
   catch (error) {
     const correlationId = randomUUID();
-    if (error instanceof QuotaWait) return NextResponse.json({ error: { code: 'PROVIDER_WAIT', message: error.message, correlationId } }, { status: 429, headers: { 'Retry-After': String(Math.ceil(error.retryMs / 1000)) } });
+    if (error instanceof QuotaWait) return NextResponse.json({ error: { code: 'PROVIDER_WAIT', message: `Your agent needs a short pause. Please try again in ${Math.ceil(error.retryMs / 1000)} seconds.`, correlationId } }, { status: 429, headers: { 'Retry-After': String(Math.ceil(error.retryMs / 1000)) } });
     if (error instanceof z.ZodError) return ok({ error: { code: 'INVALID_INPUT', message: 'Check the required fields and allowed values.', correlationId } }, 400);
     if (error instanceof RuleError) return ok({ error: { code: error.code, message: error.message, correlationId } }, error.status);
     console.error('Pactra request failed', correlationId, (error as { code?: string }).code || 'INTERNAL');
-    return ok({ error: { code: 'UNAVAILABLE', message: 'Pactra could not complete this request. Check the database and server configuration.', correlationId } }, 503);
+    return ok({ error: { code: 'UNAVAILABLE', message: 'Something interrupted this request. Please try again shortly.', correlationId } }, 503);
   }
 }
 export { handle as GET, handle as POST };

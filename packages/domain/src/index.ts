@@ -1,12 +1,17 @@
 import { z } from 'zod';
 
 export const briefSchema = z.object({
-  goal: z.string().trim().min(10).max(1500).refine(text => !/\b8k\b|\b120\s?fps\b|\bwaterproof\b/i.test(text), 'This fictional market does not support that requested capability. Confirm a supported 4K kit.'),
+  goal: z.string().trim().min(10).max(1500),
   capCents: z.number().int().min(100).max(1_000_000),
   maxDays: z.number().int().min(1).max(30),
   preference: z.enum(['quality', 'price']),
   discloseBudget: z.boolean().default(false),
-}).strict();
+  items: z.array(z.object({ productId: z.string().min(1).max(80), quantity: z.number().int().min(1).max(5) }).strict()).min(1).max(8).optional(),
+}).strict().superRefine((brief, ctx) => {
+  if (brief.items && new Set(brief.items.map(i => i.productId)).size !== brief.items.length) ctx.addIssue({ code: 'custom', message: 'Choose each product once and adjust its quantity.' });
+  // Old rooms retain their original camera-kit contract. New rooms select exact catalog products.
+  if (!brief.items && /\b8k\b|\b120\s?fps\b|\bwaterproof\b/i.test(brief.goal)) ctx.addIssue({ code: 'custom', message: 'This earlier camera-kit request includes an unsupported feature.' });
+});
 export type Brief = z.infer<typeof briefSchema>;
 export const decisionSchema = z.object({
   action: z.enum(['offer', 'hold', 'decline']),
@@ -15,7 +20,7 @@ export const decisionSchema = z.object({
   message: z.string().max(400),
 }).strict();
 export type Decision = z.infer<typeof decisionSchema>;
-export type Product = { id: string; name: string; role: string; score: number; video: string; audio: string; mount: string };
+export type Product = { id: string; name: string; role: string; score: number; video: string; audio: string; mount: string; description?: string };
 export type Listing = { id: string; sellerId: string; product: Product; listCents: number; floorCents: number; available: number };
 export type Seller = { id: string; name: string; strategy: string; policyVersion: number; warrantyMonths: number; standardCents: number; standardDays: number; expressCents: number; expressDays: number };
 export type OfferTerms = {
@@ -46,6 +51,13 @@ export function constraints(offer: OfferTerms, brief: Brief): string[] {
   const reasons: string[] = [];
   if (offer.totalCents > brief.capCents) reasons.push('Over your total budget');
   if (offer.arrivalDays > brief.maxDays) reasons.push('Arrives after your deadline');
+  if (brief.items) {
+    for (const wanted of brief.items) {
+      if (offer.items.filter(i => i.product.id === wanted.productId).reduce((n, i) => n + i.quantity, 0) !== wanted.quantity) reasons.push('The offer must include your selected products and quantities');
+    }
+    if (offer.items.some(i => !brief.items!.some(w => w.productId === i.product.id))) reasons.push('The offer includes an item you did not request');
+    return [...new Set(reasons)];
+  }
   for (const role of ['camera', 'microphone', 'tripod']) {
     if (offer.items.filter(x => x.product.role === role).reduce((sum, x) => sum + x.quantity, 0) !== 1) reasons.push(`Needs exactly one ${role}`);
   }
@@ -60,6 +72,12 @@ export function constraints(offer: OfferTerms, brief: Brief): string[] {
 
 export function utility(offer: OfferTerms, brief: Brief): number {
   if (constraints(offer, brief).length) return -1;
+  if (brief.items) {
+    // Exact products are shared across offers: compare total price and delivery, not invented quality.
+    const price = 100 * (brief.capCents - offer.totalCents) / brief.capCents;
+    const delivery = 100 * (brief.maxDays - offer.arrivalDays) / brief.maxDays;
+    return brief.preference === 'price' ? price * .85 + delivery * .15 : price * .5 + delivery * .5;
+  }
   const camera = offer.items.find(x => x.product.role === 'camera')!.product.score;
   const mic = offer.items.find(x => x.product.role === 'microphone')!.product.score;
   const price = 100 * (brief.capCents - offer.totalCents) / brief.capCents;

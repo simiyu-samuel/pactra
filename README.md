@@ -1,10 +1,12 @@
 # Pactra
 
-**Discover more. Make a better pact.**
+**Your agent negotiates. You make the call.**
 
-Pactra combines an owned seller marketplace, Channel3 product discovery, and AI web search with merchant redirects. On Pactra, a buyer's AI negotiates with seller agents over price, bundles, delivery, and supported terms. The buyer watches the offers evolve, changes their priorities, and chooses a deal. PayPal completes the approved transaction.
+Pactra gives buyers and sellers their own negotiating agents. Buyers select products, quantities, budget and delivery limits. Sellers set asking prices, private minimum prices, stock and delivery options. Their agents exchange offers; the buyer compares the complete terms and approves the exact agreed PayPal test payment. External store search and flights are optional discovery tools.
 
-**Project status:** consumer marketplace and live external discovery implemented; final release validation continues. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
+The current approved direction is [negotiation first](docs/18-negotiation-first.md). The marketplace supports any seller-listed product category; the local demo includes everyday bags, home goods, electronics, fashion and the earlier camera catalog. The seller workspace can add products in other categories.
+
+**Project status:** negotiation-first marketplace, general product requests and seller product listing implemented; final release validation continues. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
 
 ## Approved marketplace direction
 
@@ -12,9 +14,9 @@ See the [approved expansion plan](docs/16-marketplace-expansion.md) for the thre
 
 ## The native negotiation experience
 
-> "Find me a creator camera kit under $500, delivered within four days. Video quality matters more than extras."
+> "Negotiate this backpack and kettle within $150, including delivery within five days."
 
-Three seller agents compete using their own catalog, stock, and private pricing policies. The buyer agent asks for concessions and substitutions. The user can lower the budget to $430 and watch the market respond. Pactra compares eligible offers, explains its recommendation, and checks out the exact accepted offer through PayPal sandbox.
+The buyer confirms exact products and quantities. Three independent demo seller agents respond within their own stock and price limits. A live eleven-step Groq run for that mixed-category request completed successfully. Existing camera-kit rooms keep their original contracts; new buyer requests select catalog products directly.
 
 The distinguishing feature is **negotiation over several terms with enforceable boundaries**. An attractive sentence from an agent cannot create stock, change the payable amount, or override the customer's approval.
 
@@ -22,10 +24,10 @@ The distinguishing feature is **negotiation over several terms with enforceable 
 
 | Decision | Baseline |
 | --- | --- |
-| Audience | Budget-conscious first-time video creators |
-| Market | Native fictional creator equipment plus external product discovery; see approved expansion plan |
+| Audience | Buyers and sellers negotiating product purchases |
+| Market | Seller-listed demo products across categories, with optional external discovery |
 | Sellers | Three simulated storefronts with separate agent context and policies |
-| Checkout | One selected seller's bundle, USD, PayPal sandbox |
+| Checkout | One selected seller’s product agreement, USD, PayPal test payments |
 | Merchant arrangement | One platform-owned sandbox business account for all simulated storefronts |
 | AI | Groq API free tier, initially GPT-OSS 20B, with strict JSON decisions and application validation |
 | Application | TypeScript, Next.js, PostgreSQL, dedicated Node.js negotiation worker |

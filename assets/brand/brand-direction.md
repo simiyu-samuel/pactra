@@ -4,7 +4,7 @@ Approved direction: warm editorial marketplace, October 20, 2026.
 
 **Name:** Pactra. **Tagline:** Your terms. Negotiated.
 
-Pactra invites people to discover products, compare choices and negotiate a fictional creator kit with native sellers. The shopping experience leads with useful imagery and readable prices. The agent is a clearly explained shopping capability.
+Pactra gives buyers and sellers their own negotiating agents. The buyer chooses products and limits; sellers control their prices and stock. Agent negotiation is the primary experience. Other-store search and flights are supporting tools.
 
 ## Visual system
 
@@ -17,9 +17,9 @@ Pactra invites people to discover products, compare choices and negotiate a fict
 | Muted | `#657354` | Supporting shopping evidence |
 | Border | `#E3E4D8` | Subtle divisions |
 
-DM Sans and Manrope provide the existing readable sans-serif foundation. Georgia italic adds an editorial voice to large campaign headings. Prices use tabular numerals. Use generous whitespace, strong product photographs and restrained asymmetrical curves. Shared navigation keeps Discover, Flights and Your shopping agent visible on small screens.
+DM Sans and Manrope provide the existing readable sans-serif foundation. Georgia italic adds an editorial voice to large campaign headings. Prices use tabular numerals. Use generous whitespace, strong product photographs and restrained asymmetrical curves. Shared navigation keeps Buyer agent, Marketplace and Seller workspace visible on small screens.
 
-The existing Handshake icon supplies the brand tile. Native CSS and the established Lucide icon set provide interface marks; no third-party brand logo pack is bundled.
+An original vector mark depicts two sides linked in agreement. The wordmark uses an Arial bold base and accompanies the orange/ivory mark. Shared BrandLogo rendering and SVG assets keep the same lockup everywhere. The established Lucide icon set supplies functional interface icons. Decorative stars, sparkles and ornamental dots are excluded. See [the brand kit](README.md).
 
 ## Imagery and honest shopping copy
 

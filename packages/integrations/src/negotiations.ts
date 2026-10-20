@@ -14,6 +14,12 @@ export async function negotiationAllowance(ownerId: string, client: Pick<Tx, 'sh
   return { limit, used, remaining: Math.max(0, limit - used), nextAvailableAt: used >= limit ? new Date(+rooms[used - limit].createdAt + day).toISOString() : null,
     recentRooms: rooms.slice(-6).reverse().map(r => ({ id: r.id, state: r.state, capCents: briefSchema.parse(r.brief).capCents, createdAt: r.createdAt.toISOString() })) };
 }
+export async function assertProductsAvailable(brief: Brief, client: Pick<Tx, 'listing'> = db) {
+  if (!brief.items) return;
+  const rows = await client.listing.findMany({ where: { productId: { in: brief.items.map(i => i.productId) } } });
+  const sellerIds = [...new Set(rows.map(l => l.sellerId))];
+  if (!sellerIds.some(id => brief.items!.every(i => rows.some(l => l.sellerId === id && l.productId === i.productId && l.onHand - l.reserved >= i.quantity)))) throw new RuleError('PRODUCTS_UNAVAILABLE', 'No seller currently has every selected item in the quantities you need. Try fewer items or a smaller quantity.');
+}
 export async function createNegotiation(ownerId: string, rawBrief: Brief, commandKey: string) {
   const brief = briefSchema.parse(rawBrief);
   return db.$transaction(async tx => {
@@ -24,12 +30,13 @@ export async function createNegotiation(ownerId: string, rawBrief: Brief, comman
       if (existing.ownerId !== ownerId || JSON.stringify(briefSchema.parse(existing.brief)) !== JSON.stringify(brief)) throw new RuleError('COMMAND_CONFLICT', 'This command key is already in use.');
       return existing;
     }
+    await assertProductsAvailable(brief, tx);
     const allowance = await negotiationAllowance(ownerId, tx);
     if (!allowance.remaining) throw new RuleError('SESSION_LIMIT', `You’ve started ${allowance.used} of ${allowance.limit} allowed negotiations in the past 24 hours. The next slot opens ${allowance.nextAvailableAt}. Reopen a recent room to continue without starting another.`, 429);
     const created = await tx.shoppingSession.create({ data: { id: commandKey, ownerId, brief: json(brief) } });
     await recordBrief(tx, created.id, 1, brief);
     await tx.job.create({ data: { key: `${created.id}:1`, roomId: created.id, briefVersion: 1 } });
-    await event(tx, created.id, 'brief.confirmed', { message: 'Your brief is confirmed. Seller agents will respond using their own policies.' });
+    await event(tx, created.id, 'brief.confirmed', { message: 'Your request is saved. Your agent will now discuss the deal with sellers.' });
     return created;
   });
 }

@@ -44,3 +44,20 @@ describe('validated negotiation agreements', () => {
     expect(() => briefSchema.parse({ ...brief, goal: 'I need an 8K camera, microphone and tripod.' })).toThrow();
   });
 });
+
+describe('exact product requests across categories', () => {
+  it('rejects duplicate products and quantities outside the supported range', () => {
+    const item={productId:'BAG-01',quantity:1};
+    expect(()=>briefSchema.parse({...brief,items:[item,item]})).toThrow('Choose each product once');
+    expect(()=>briefSchema.parse({...brief,items:[{...item,quantity:6}]})).toThrow();
+  });
+  it('checks exact identities, quantities and unexpected extras without camera assumptions', () => {
+    const item={listingId:'book',quantity:2,unitPriceCents:2000,listedUnitCents:2500,product:{id:'BOOK-01',name:'Field guide',role:'books',score:50,video:'',audio:'',mount:''}};
+    const offer={items:[item],shipping:'standard' as const,shippingCents:500,arrivalDays:3,warrantyMonths:0,subtotalCents:4000,totalCents:4500,listedTotalCents:5500,currency:'USD' as const,message:'Two books with delivery.'};
+    const request={...brief,items:[{productId:'BOOK-01',quantity:2}]};
+    expect(constraints(offer,request)).toEqual([]);
+    expect(constraints({...offer,items:[{...item,product:{...item.product,id:'OTHER'}}]},request)).toContain('The offer must include your selected products and quantities');
+    expect(constraints({...offer,items:[item,{...item,listingId:'extra',product:{...item.product,id:'EXTRA'}}]},request)).toContain('The offer includes an item you did not request');
+    expect(utility(offer,request)).toBeGreaterThan(utility({...offer,arrivalDays:4},request));
+  });
+});

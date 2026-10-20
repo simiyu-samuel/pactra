@@ -3,8 +3,9 @@ import { expect, test } from '@playwright/test';
 test('the market explains the product and serves only public catalog fields', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Great finds. Better deals.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Your next creative chapter.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your agent negotiates. You make the call.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Choose the product. Negotiate the deal.' })).toBeVisible();
+  await page.getByText('Looking elsewhere? Search other stores', { exact: true }).click();
   await expect(page.getByRole('button', { name: 'Pactra sellers', exact: true })).toBeVisible();
   const response = await page.request.get('/api/bootstrap'); expect(response.ok()).toBeTruthy();
   const body = await response.text(); expect(body).not.toContain('floorCents'); expect(body).not.toContain('tokenHash'); expect(body).not.toContain('PAYPAL_CLIENT_SECRET');
@@ -14,6 +15,7 @@ test('the market explains the product and serves only public catalog fields', as
 
 test('the brief can be steered on a narrow mobile screen', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 }); await page.goto('/negotiate');
+  await expect(page.getByRole('spinbutton', { name: 'Quantity for Everyday Carry Backpack', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Lowest total' }).click();
   await expect(page.getByRole('button', { name: 'Lowest total' })).toHaveClass(/chosen/);
   await page.getByRole('spinbutton', { name: 'Total budget' }).fill('430');

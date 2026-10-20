@@ -1,0 +1,4 @@
+import { ArrowRight, Handshake, ShieldCheck } from 'lucide-react';
+export default function DealStory() {
+  return <div className="deal-story"><p className="deal-kicker">THE CONVERSATION THAT MAKES THE DIFFERENCE</p><div className="deal-person"><span>YOUR BUYER AGENT</span><h2>“Find a deal that works for me.”</h2><p>Your products, your budget, your deadline.</p></div><div className="deal-exchange"><span>Offers</span><Handshake size={29}/><span>Counteroffers</span></div><div className="deal-person seller"><span>THE SELLER’S AGENT</span><h2>“Let’s find terms we can agree on.”</h2><p>Their prices, their stock, their boundaries.</p></div><div className="deal-approval"><ShieldCheck size={19}/><p><b>You review the agreement.</b><br/>PayPal payment happens only after you approve.</p><ArrowRight size={20}/></div></div>;
+}

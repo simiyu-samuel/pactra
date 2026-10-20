@@ -1,5 +1,6 @@
 # Product brief
 
+> Current approved direction (October 20): [Negotiation first](18-negotiation-first.md) makes buyer/seller agent negotiation primary and supports seller-listed products across categories. Earlier creator-only and discovery-led boundaries below are historical.
 > October 19 approved scope update: [Marketplace expansion](16-marketplace-expansion.md) supersedes the original single-category discovery/UI boundary below. Native negotiation and PayPal integrity requirements remain in force.
 
 Status: proposed implementation baseline, October 17, 2026.

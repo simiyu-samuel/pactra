@@ -9,7 +9,7 @@
 | Scenarios and example transcript | Written | Original acceptance/demo design; example transcript is not live AI output |
 | Hackathon reference summary | Written | Paraphrase of the user-supplied overview; organizer rules remain authoritative |
 | Architecture diagrams | Embedded Mermaid in docs | Original diagrams, editable with the plan |
-| Logo and favicon | Not created | Develop original vector mark after the brand direction is reviewed |
+| Logo, favicon and app icons | Original vector identity and rendered exports | Linked-agreement mark and standard/light wordmarks in public/brand; Next favicon, SVG icon, Apple touch icon and install icons use the same artwork |
 | Product illustrations | Original generated concepts and earlier native SVG | Five equipment WebP concepts for the fictional catalog; earlier native SVG source retained |
 | Application screenshots | Created in `previews/` | Desktop/mobile captures from the running first build; no live AI/payment outcome is represented |
 | Demo video and narration | Not created | Record the working build; no copyrighted background music |
@@ -33,3 +33,9 @@ Flight screenshots in `previews/pactra-flights-*.jpg` are original local browser
 Seven original built-in `image_gen` images are bundled under `apps/web/public/images/`: `creator-studio.webp`, `coastal-escape.webp`, `camera-concept.webp`, `audio-concept.webp`, `tripod-concept.webp`, `light-concept.webp`, and `storage-concept.webp`. Final prompts, paths and intended uses are recorded in [brand/image-prompts.json](brand/image-prompts.json). WebP delivery copies total approximately 908 KB. The creator and coast images are campaign inspiration; equipment images are labeled fictional concepts and are not photographs of exact products. No generated image represents a payment outcome, provider inventory or actual flight availability. Existing external retailer images remain provider-supplied remote media.
 
 `previews/pactra-editorial-*.jpg` are original browser captures of the redesigned local app. Storefront/agent/coastal views show original campaign or fictional concept imagery. `pactra-editorial-channel3.jpg` displays time-specific retailer data returned by Channel3. `*-fixture.jpg` captures show synthetic isolated test offers and receipts with explicit fixture identifiers, not actual payment or negotiation outcomes. The isolated records were removed after verification.
+
+## Negotiation-first brand and catalog — October 20, 2026
+
+The linked-agreement logo and wordmarks are original SVG path artwork with a type-based wordmark. The favicon and 180/192/512px PNG exports are rendered from that same original mark. The brand kit records final asset paths and usage. Category illustrations (`category-bags.svg`, `category-home.svg`, `category-electronics.svg`, `category-fashion.svg`, `category-other.svg`) are original vector artwork for demo products. They are illustrative and do not claim to be exact product photographs. Decorative stars and dots have been removed from the rendered interface.
+
+`previews/pactra-core-*.jpg` are original browser captures of the negotiation-first interface. The seller captures labeled `*-fixture.jpg` show isolated test-shop controls and synthetic catalog additions, not real merchant data. The temporary book listing and test-only rule change were removed after the check. Marketplace and buyer captures display original branding and clearly labeled demo products.

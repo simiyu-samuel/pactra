@@ -49,6 +49,7 @@ model Product {
   name String
   role String
   score Int
+  description String @default("")
   video String
   audio String
   mount String

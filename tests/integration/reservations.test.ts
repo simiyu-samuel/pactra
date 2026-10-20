@@ -18,7 +18,7 @@ async function fixture() {
   await db.job.create({ data: { key: `${room.id}:1`, roomId: room.id, briefVersion: 1 } });
   const seller = await db.seller.findUniqueOrThrow({ where: { id: 'studio_stack' }, include: { listings: { include: { product: true } } } });
   const terms = makeOffer({ action: 'offer', shipping: 'standard', message: 'A valid fictional kit.', items: [['SS-CAM-02', 37900], ['SS-MIC-01', 1900], ['SS-TRI-01', 1100]].map(([listingId, unitPriceCents]) => ({ listingId, unitPriceCents, quantity: 1 })) }, seller, seller.listings.map(x => ({ ...x, available: x.onHand - x.reserved })))!;
-  const offer = await db.offer.create({ data: { roomId: room.id, sellerId: seller.id, briefVersion: 1, policyVersion: 1, round: 1, terms: json(terms), expiresAt: new Date(Date.now() + 60000) } });
+  const offer = await db.offer.create({ data: { roomId: room.id, sellerId: seller.id, briefVersion: 1, policyVersion: seller.policyVersion, round: 1, terms: json(terms), expiresAt: new Date(Date.now() + 60000) } });
   return { owner, room, offer };
 }
 describe('transactional agreement reservations', () => {
