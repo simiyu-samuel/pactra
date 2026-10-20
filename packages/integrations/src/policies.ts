@@ -11,14 +11,14 @@ export const policyDraftSchema = z.object({
   warrantyMonths: z.number().int().min(0).max(60),
   standardCents: z.number().int().min(0).max(10000), standardDays: z.number().int().min(1).max(30),
   expressCents: z.number().int().min(0).max(10000), expressDays: z.number().int().min(1).max(30),
-  listings: z.array(z.object({ id: z.string().min(1).max(80), floorCents: z.number().int().min(0).max(1000000), onHand: z.number().int().min(0).max(10000), expectedOnHand: z.number().int().min(0), expectedReserved: z.number().int().min(0) }).strict()).min(1).max(50),
+  listings: z.array(z.object({ id: z.string().min(1).max(80), floorCents: z.number().int().min(0).max(1000000), onHand: z.number().int().min(0).max(10000), expectedOnHand: z.number().int().min(0), expectedReserved: z.number().int().min(0) }).strict()).min(0).max(50),
 }).strict().refine(x => x.expressDays <= x.standardDays, 'Express delivery must be no slower than standard delivery.');
 export type PolicyDraft = z.infer<typeof policyDraftSchema>;
 
 export async function sellerSnapshot(tx: Tx, sellerId: string) {
-  const seller = await tx.seller.findUniqueOrThrow({ where: { id: sellerId }, include: { listings: { orderBy: { id: 'asc' } } } });
+  const seller = await tx.seller.findUniqueOrThrow({ where: { id: sellerId }, include: { listings: { orderBy: { id: 'asc' }, include: { product: true } } } });
   const { listings, ...policy } = seller;
-  return { seller: policy, listings: listings.map(({ id, productId, listCents, floorCents, onHand, reserved }) => ({ id, productId, listCents, floorCents, onHand, reserved })) };
+  return { seller: policy, listings: listings.map(({ id, productId, listCents, floorCents, onHand, reserved, status, product }) => ({ id, productId, listCents, floorCents, onHand, reserved, status, product })) };
 }
 
 export async function ensurePolicyVersion(tx: Tx, sellerId: string) {
@@ -37,7 +37,7 @@ export async function publishPolicy(sellerId: string, raw: unknown, ownerSession
   const requestHash = createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
   return db.$transaction(async tx => {
     await lockSeller(tx, sellerId);
-    const seller = await tx.seller.findUnique({ where: { id: sellerId }, include: { listings: { orderBy: { id: 'asc' } } } });
+    const seller = await tx.seller.findUnique({ where: { id: sellerId }, include: { listings: { where: { status: { not: 'archived' } }, orderBy: { id: 'asc' } } } });
     if (!seller) throw new RuleError('NOT_FOUND', 'Seller not found.', 404);
     const previous = await tx.sellerPolicyVersion.findUnique({ where: { commandKey: input.commandKey } });
     if (previous) {
@@ -48,7 +48,7 @@ export async function publishPolicy(sellerId: string, raw: unknown, ownerSession
     if (input.listings.length !== seller.listings.length || new Set(input.listings.map(x => x.id)).size !== seller.listings.length || input.listings.some(x => !seller.listings.some(l => l.id === x.id))) throw new RuleError('POLICY_LISTINGS_INVALID', 'Publish exactly this seller’s existing listings.');
     // Same seller -> sorted listing order is also used during acceptance.
     for (const listing of seller.listings) await tx.$queryRaw`SELECT id FROM "Listing" WHERE id = ${listing.id} FOR UPDATE`;
-    const current = await tx.listing.findMany({ where: { sellerId } });
+    const current = await tx.listing.findMany({ where: { sellerId, status: { not: 'archived' } } });
     for (const line of input.listings) {
       const listing = current.find(l => l.id === line.id)!;
       if (listing.onHand !== line.expectedOnHand || listing.reserved !== line.expectedReserved) throw new RuleError('INVENTORY_CHANGED', 'Stock or reservations changed while you edited. Reload before publishing.');

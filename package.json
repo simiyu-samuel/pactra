@@ -19,7 +19,8 @@
     "setup:owner": "node scripts/setup-owner.mjs",
     "verify:discovery": "tsx scripts/verify-discovery.ts",
     "verify:flights": "tsx scripts/verify-flights.ts",
-    "status:payments": "tsx scripts/payment-status.ts"
+    "status:payments": "tsx scripts/payment-status.ts",
+    "catalog:prepare": "tsx scripts/prepare-catalog.ts"
   },
   "devDependencies": {
     "tsx": "4.23.15",

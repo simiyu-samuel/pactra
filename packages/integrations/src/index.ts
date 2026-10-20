@@ -14,4 +14,4 @@ export { duffelConfigured } from './duffel';
 
 export { receivePayPalWebhook, processPaymentEvent } from './webhooks';
 
-export { addSellerProduct } from './catalog';
+export { addSellerProduct, updateSellerProduct } from './catalog';

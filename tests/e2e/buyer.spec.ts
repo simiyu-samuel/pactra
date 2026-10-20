@@ -15,7 +15,7 @@ test('the market explains the product and serves only public catalog fields', as
 
 test('the brief can be steered on a narrow mobile screen', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 }); await page.goto('/negotiate');
-  await expect(page.getByRole('spinbutton', { name: 'Quantity for Everyday Carry Backpack', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your next deal. On your terms.', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Lowest total' }).click();
   await expect(page.getByRole('button', { name: 'Lowest total' })).toHaveClass(/chosen/);
   await page.getByRole('spinbutton', { name: 'Total budget' }).fill('430');

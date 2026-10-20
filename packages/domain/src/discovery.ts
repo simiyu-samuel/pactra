@@ -2,6 +2,9 @@ export type DiscoverySource = 'channel3' | 'jumia' | 'kilimall' | 'amazon';
 export type MarketOffer = {
   id: string;
   productId?: string;
+  images?: string[];
+  brand?: string;
+  productSourceUrl?: string | null;
   title: string;
   description: string;
   source: DiscoverySource | 'pactra';

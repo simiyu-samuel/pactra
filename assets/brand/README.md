@@ -16,3 +16,5 @@ Original vector identity: two sides linked into one agreement. Colours are orang
 Use `BrandLogo` for application headers and footers. Use the standalone mark only where the full wordmark will not fit. Keep the proportions intact, preserve clear space, and use the light wordmark on dark backgrounds. SVG sources are authoritative; PNG/ICO copies are rendered exports of the same mark. The artwork was authored as native vector paths, not generated as a bitmap or taken from a logo pack.
 
 The existing seven generated campaign/equipment photos retain their provenance in [image-prompts.json](image-prompts.json). Five new general category illustrations in `apps/web/public/images/category-*.svg` are original native vector artwork and clearly illustrate demo goods.
+
+The home hero now uses `apps/web/public/images/shopping-moment.webp`, an original general-shopping lifestyle campaign image created with the built-in image generator. Its prompt is in the manifest. Real catalog photos come from manufacturer references in `assets/catalog/review-products.json`; campaign art must not substitute for those product photos.

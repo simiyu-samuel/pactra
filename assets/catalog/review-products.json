@@ -1,0 +1,88 @@
+[
+  {
+    "id": "real-aeropress-original",
+    "name": "AeroPress Original Coffee Maker",
+    "brand": "AeroPress",
+    "category": "home",
+    "description": "Manual coffee press with a 10 oz capacity. The Original model uses immersion, air pressure and a paper micro-filter.",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0601/8783/6659/files/AP_OG_PDP_ATF_1.png?v=1757095176",
+      "https://cdn.shopify.com/s/files/1/0601/8783/6659/files/AP_OG_PDP_ATF_2.png?v=1757095176",
+      "https://cdn.shopify.com/s/files/1/0601/8783/6659/files/AP_OG_PDP_ATF_3.png?v=1757095176"
+    ],
+    "sourceUrl": "https://aeropress.com/products/aeropress-coffee-maker",
+    "checkedAt": "2026-10-20",
+    "photoCredit": "AeroPress / manufacturer product page",
+    "reviewStatus": "Draft reference only. Seller prices, minimums and stock must be entered and confirmed by the owner."
+  },
+  {
+    "id": "real-soundcore-q20i-blue",
+    "name": "soundcore Q20i Headphones — Navy Blue",
+    "brand": "soundcore",
+    "category": "electronics",
+    "description": "Over-ear Bluetooth headphones with hybrid active noise cancellation, 40 mm drivers and adjustable EQ through the soundcore app. Navy Blue finish.",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0516/3761/6830/files/20251230-142814_3840x.png?v=1767076187"
+    ],
+    "sourceUrl": "https://www.soundcore.com/products/q20i-a3004z31",
+    "checkedAt": "2026-10-20",
+    "photoCredit": "soundcore / manufacturer product page",
+    "reviewStatus": "Draft reference only. Seller prices, minimums and stock must be entered and confirmed by the owner."
+  },
+  {
+    "id": "real-logitech-pebble-m350s-graphite",
+    "name": "Logitech Pebble Mouse 2 M350s — Tonal Graphite",
+    "brand": "Logitech",
+    "category": "electronics",
+    "description": "Compact Bluetooth mouse with quiet clicks and a customizable middle button. Tonal Graphite finish.",
+    "images": [
+      "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/pebble-mouse-2-m350s/2026-refresh/gallery/pebble-mouse-2-m350s-tonal-graphite-top-angle-gallery-1.png"
+    ],
+    "sourceUrl": "https://www.logitech.com/en-us/shop/p/pebble-2-m350s-wireless-mouse",
+    "checkedAt": "2026-10-20",
+    "photoCredit": "Logitech / manufacturer product page",
+    "reviewStatus": "Draft reference only. Seller prices, minimums and stock must be entered and confirmed by the owner."
+  },
+  {
+    "id": "real-bellroy-classic-backpack-black",
+    "name": "Bellroy Classic Backpack 20L — Black",
+    "brand": "Bellroy",
+    "category": "bags",
+    "description": "Everyday commuter backpack with a 20-litre capacity, in Black.",
+    "images": [
+      "https://bellroy-product-images.imgix.net//bellroy_dot_com_gallery_image/USD/BCBD-BLK-244/0?auto=format&fit=max&w=1000"
+    ],
+    "sourceUrl": "https://bellroy.com/products/classic-backpack",
+    "checkedAt": "2026-10-20",
+    "photoCredit": "Bellroy / manufacturer product page",
+    "reviewStatus": "Draft reference only. Seller prices, minimums and stock must be entered and confirmed by the owner."
+  },
+  {
+    "id": "real-stanley-quencher-40-cream",
+    "name": "Stanley Quencher H2.0 FlowState 40 oz — Cream 2.0",
+    "brand": "Stanley 1913",
+    "category": "home",
+    "description": "40 oz handled tumbler with a FlowState lid and straw, in Cream 2.0.",
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0375/3269/6635/files/B2B_Web_PNG-TheQuencherH2.OFlowStateTumbler40OZ-Cream2.0-Front.png?v=1770327737"
+    ],
+    "sourceUrl": "https://www.stanley1913.com/products/adventure-quencher-travel-tumbler-40-oz?variant=44559859613823",
+    "checkedAt": "2026-10-20",
+    "photoCredit": "Stanley 1913 / manufacturer product page",
+    "reviewStatus": "Draft reference only. Seller prices, minimums and stock must be entered and confirmed by the owner."
+  },
+  {
+    "id": "real-jbl-flip-6-black",
+    "name": "JBL Flip 6 Portable Speaker — Black",
+    "brand": "JBL",
+    "category": "electronics",
+    "description": "Portable Bluetooth speaker with a two-way speaker system and IP67 water and dust resistance. Black finish.",
+    "images": [
+      "https://www.jbl.com/dw/image/v2/BFND_PRD/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw4e91d6eb/1_JBL_FLIP6_HERO_BLACK_29391_x2.png?sw=1000&sh=1000"
+    ],
+    "sourceUrl": "https://www.jbl.com/FLIP-6-.html",
+    "checkedAt": "2026-10-20",
+    "photoCredit": "JBL / manufacturer product page",
+    "reviewStatus": "Draft reference only. Seller prices, minimums and stock must be entered and confirmed by the owner."
+  }
+]

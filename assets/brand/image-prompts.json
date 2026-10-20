@@ -47,5 +47,12 @@
     "savedPath": "apps/web/public/images/storage-concept.webp",
     "mode": "built-in image_gen",
     "use": "Illustrative concept for fictional native catalog items; not an exact product photograph."
+  },
+  {
+    "key": "pactra_shopping_moment",
+    "prompt": "Use case: photorealistic-natural. Asset type: editorial hero campaign photograph for Pactra, a marketplace where buyer and seller agents negotiate product deals. Primary request: a warm, attractive, natural shopping lifestyle scene. A stylish adult Black woman in a cream cotton shirt, relaxed at an oak table in a sunlit contemporary apartment, looking thoughtfully and happily at an open laptop angled away so no screen text or UI is visible. An understated tan everyday backpack rests beside the table and a neutral ceramic mug sits near her hand. Ivory plaster walls, olive-green plant, small burnt-orange fabric accent, soft window shadows and authentic tactile materials. Landscape 3:2 photographic composition suitable for the right side of a website hero; woman and laptop in the middle-right, believable natural hands, candid editorial quality, subtle film grain, bright and airy rather than dark or glossy. Campaign storytelling about having more time while an agent handles shopping, not a product photograph or an actual testimonial. No logos, no readable text, no stars, no sparkles, no decorative dots, no prices, no watermark, no floating UI, no robot, no branded products.",
+    "savedPath": "apps/web/public/images/shopping-moment.webp",
+    "mode": "built-in image_gen",
+    "use": "Original lifestyle campaign art, not a product photo or a buyer testimonial."
   }
 ]

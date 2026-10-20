@@ -4,19 +4,19 @@
 
 Pactra gives buyers and sellers their own negotiating agents. Buyers select products, quantities, budget and delivery limits. Sellers set asking prices, private minimum prices, stock and delivery options. Their agents exchange offers; the buyer compares the complete terms and approves the exact agreed PayPal test payment. External store search and flights are optional discovery tools.
 
-The current approved direction is [negotiation first](docs/18-negotiation-first.md). The marketplace supports any seller-listed product category; the local demo includes everyday bags, home goods, electronics, fashion and the earlier camera catalog. The seller workspace can add products in other categories.
+The current approved direction is [negotiation first](docs/18-negotiation-first.md). The marketplace supports any seller-listed product category. Six real branded product references with manufacturer photos are prepared as private drafts in each seller workspace. Owner review sets prices, private minimums, stock and delivery before publication. See [catalog review](docs/19-catalog-review.md).
 
-**Project status:** negotiation-first marketplace, general product requests and seller product listing implemented; final release validation continues. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
+**Project status:** negotiation-first marketplace, general product requests, real-product review drafts and seller catalog management implemented; final release validation continues. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
 
 ## Approved marketplace direction
 
-See the [approved expansion plan](docs/16-marketplace-expansion.md) for the three discovery paths, consumer storefront, provider boundaries, rollout and acceptance criteria. External offers redirect to their merchant checkout; participating Pactra sellers use the existing negotiated PayPal sandbox flow. The native catalog remains fictional.
+See the [approved expansion plan](docs/16-marketplace-expansion.md) for the three discovery paths, consumer storefront, provider boundaries, rollout and acceptance criteria. External offers redirect to their merchant checkout; participating Pactra sellers use the existing negotiated PayPal sandbox flow. The native storefront displays published real-product listings; earlier fictional samples are archived. PayPal remains in sandbox mode.
 
 ## The native negotiation experience
 
 > "Negotiate this backpack and kettle within $150, including delivery within five days."
 
-The buyer confirms exact products and quantities. Three independent demo seller agents respond within their own stock and price limits. A live eleven-step Groq run for that mixed-category request completed successfully. Existing camera-kit rooms keep their original contracts; new buyer requests select catalog products directly.
+The buyer confirms exact products and quantities. Independent seller agents respond within their own published stock and price limits. A live eleven-step Groq run for that mixed-category request completed successfully. Existing camera-kit rooms keep their original contracts; new buyer requests select catalog products directly.
 
 The distinguishing feature is **negotiation over several terms with enforceable boundaries**. An attractive sentence from an agent cannot create stock, change the payable amount, or override the customer's approval.
 
@@ -25,7 +25,7 @@ The distinguishing feature is **negotiation over several terms with enforceable 
 | Decision | Baseline |
 | --- | --- |
 | Audience | Buyers and sellers negotiating product purchases |
-| Market | Seller-listed demo products across categories, with optional external discovery |
+| Market | Owner-reviewed product listings across categories, with optional external discovery |
 | Sellers | Three simulated storefronts with separate agent context and policies |
 | Checkout | One selected seller’s product agreement, USD, PayPal test payments |
 | Merchant arrangement | One platform-owned sandbox business account for all simulated storefronts |
@@ -44,7 +44,7 @@ Prerequisites: Node.js 22+, pnpm 10.34.7, and PostgreSQL 18 (or Docker Compose).
 
 1. Run `pnpm install` and copy `.env.example` to `.env.local` in the repository root. Fill the Groq, Channel3 and PayPal sandbox fields locally; never commit the populated file.
 2. Start PostgreSQL with `docker compose up -d db`, or use an existing local instance and update `DATABASE_URL`.
-3. Run `pnpm db:generate`, `pnpm db:migrate`, and `pnpm db:seed`.
+3. Run `pnpm db:generate`, `pnpm db:migrate`, `pnpm db:seed`, then `pnpm catalog:prepare`. The last command archives sample listings and prepares private real-product drafts without overwriting your edits.
 4. Run `pnpm dev` to start the web app and the negotiation/reconciliation worker.
 5. Open [Pactra locally](http://localhost:3100). Without provider credentials, the product/catalog preview works and live operations display their setup requirements.
 
@@ -124,3 +124,7 @@ Use the [implementation status](docs/15-implementation-status.md) together with 
 ## Repository status
 
 Source repository: [simiyu-samuel/pactra](https://github.com/simiyu-samuel/pactra). Original project materials are licensed under [MIT](LICENSE). Local credentials, dependencies, build output, and database files are ignored.
+
+## Review products and prepare deployment
+
+Open `/seller-console` and choose a shop. Products can be saved as drafts, published, edited or archived, with up to four photos and a manufacturer source link. Existing accepted agreements preserve their original terms. Prices and stock are not inferred from manufacturer pages. [Catalog guide](docs/19-catalog-review.md) · [Render readiness and commands](docs/20-render-readiness.md).

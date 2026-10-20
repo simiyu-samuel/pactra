@@ -54,7 +54,7 @@ async function dispatch(req: NextRequest, path: string[]) {
       token = randomBytes(32).toString('base64url');
       existing = await db.browserSession.create({ data: { tokenHash: hash(token), expiresAt: new Date(Date.now() + 86_400_000) } });
     }
-    const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true, name: true, strategy: true, warrantyMonths: true, standardDays: true, expressDays: true, listings: { select: { id: true, listCents: true, onHand: true, reserved: true, product: true } } } });
+    const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true, name: true, strategy: true, warrantyMonths: true, standardDays: true, expressDays: true, listings: { where: { status: 'active', product: { isDemo: false } }, select: { id: true, listCents: true, onHand: true, reserved: true, product: true } } } });
     const response = ok({ negotiationAllowance: await negotiationAllowance(existing.id), sellers: sellers.map(s => ({ ...s, listings: s.listings.map(({ onHand, reserved, ...l }) => ({ ...l, available: onHand - reserved })) })), capabilities: { groq: Boolean(process.env.GROQ_API_KEY), paypal: paymentConfigured(), channel3: Boolean(process.env.CHANNEL3_API_KEY), model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b' } });
     response.cookies.set(cookieName, token!, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 86400, path: '/' });
     return response;
@@ -129,12 +129,12 @@ async function dispatch(req: NextRequest, path: string[]) {
         const current = await tx.shoppingSession.findUniqueOrThrow({ where: { id } });
         if (current.version !== input.expectedVersion || current.version >= 2) throw new RuleError('REVISION_LIMIT', 'This brief changed already. Start a fresh room for another revision.');
         if (await tx.checkout.findFirst({ where: { roomId: id, state: { in: [...unresolvedStates, 'paid', 'refunded', 'reversed'] } } })) throw new RuleError('CHECKOUT_LOCKED', 'Resolve your checkout before revising the brief.');
-        await assertProductsAvailable(input.brief, tx);
+        const confirmed = await assertProductsAvailable(input.brief, tx);
         await recordBrief(tx, id, current.version, current.brief, 'current_baseline');
         await tx.offer.updateMany({ where: { roomId: id, status: 'active' }, data: { status: 'superseded' } });
         await tx.job.updateMany({ where: { roomId: id, state: { in: ['ready', 'running'] } }, data: { state: 'cancelled', leaseUntil: null } });
-        const result = await tx.shoppingSession.update({ where: { id }, data: { version: { increment: 1 }, brief: json(input.brief), state: 'queued' } });
-        await recordBrief(tx, id, result.version, input.brief);
+        const result = await tx.shoppingSession.update({ where: { id }, data: { version: { increment: 1 }, brief: json(confirmed), state: 'queued' } });
+        await recordBrief(tx, id, result.version, confirmed);
         await tx.job.create({ data: { key: `${id}:${result.version}`, roomId: id, briefVersion: result.version } });
         await event(tx, id, 'brief.revised', { message: 'Brief updated. Old offers cannot be selected for the new requirements.' });
         return result;
@@ -144,7 +144,7 @@ async function dispatch(req: NextRequest, path: string[]) {
     if (req.method === 'GET' && !action) {
       const brief = briefSchema.parse(room.brief);
       const offers = await db.offer.findMany({ where: { roomId: id, briefVersion: room.version, status: { in: ['active', 'locked'] } }, include: { seller: true }, orderBy: { createdAt: 'desc' } });
-      const currentStock = new Map((await db.listing.findMany({ where: { id: { in: offers.flatMap(o => (o.terms as unknown as OfferTerms).items.map(x => x.listingId)) } }, select: { id: true, onHand: true, reserved: true } })).map(x => [x.id, x.onHand - x.reserved]));
+      const currentStock = new Map((await db.listing.findMany({ where: { id: { in: offers.flatMap(o => (o.terms as unknown as OfferTerms).items.map(x => x.listingId)) } }, select: { id: true, onHand: true, reserved: true, status: true } })).map(x => [x.id, x.status === 'active' ? x.onHand - x.reserved : 0]));
       const projected = offers.map(o => {
         const terms = o.terms as unknown as OfferTerms;
         const reasons = constraints(terms, brief);

@@ -6,7 +6,7 @@ export const briefSchema = z.object({
   maxDays: z.number().int().min(1).max(30),
   preference: z.enum(['quality', 'price']),
   discloseBudget: z.boolean().default(false),
-  items: z.array(z.object({ productId: z.string().min(1).max(80), quantity: z.number().int().min(1).max(5) }).strict()).min(1).max(8).optional(),
+  items: z.array(z.object({ productId: z.string().min(1).max(80), quantity: z.number().int().min(1).max(5), productVersion: z.number().int().positive().optional() }).strict()).min(1).max(8).optional(),
 }).strict().superRefine((brief, ctx) => {
   if (brief.items && new Set(brief.items.map(i => i.productId)).size !== brief.items.length) ctx.addIssue({ code: 'custom', message: 'Choose each product once and adjust its quantity.' });
   // Old rooms retain their original camera-kit contract. New rooms select exact catalog products.
@@ -20,8 +20,8 @@ export const decisionSchema = z.object({
   message: z.string().max(400),
 }).strict();
 export type Decision = z.infer<typeof decisionSchema>;
-export type Product = { id: string; name: string; role: string; score: number; video: string; audio: string; mount: string; description?: string };
-export type Listing = { id: string; sellerId: string; product: Product; listCents: number; floorCents: number; available: number };
+export type Product = { id: string; name: string; role: string; score: number; video: string; audio: string; mount: string; description?: string; brand?: string; images?: string[]; sourceUrl?: string | null; isDemo?: boolean; version?: number };
+export type Listing = { id: string; sellerId: string; product: Product; listCents: number; floorCents: number; available: number; status?: string };
 export type Seller = { id: string; name: string; strategy: string; policyVersion: number; warrantyMonths: number; standardCents: number; standardDays: number; expressCents: number; expressDays: number };
 export type OfferTerms = {
   items: Array<{ listingId: string; product: Product; quantity: number; unitPriceCents: number; listedUnitCents: number }>;
@@ -36,7 +36,7 @@ export function makeOffer(raw: unknown, seller: Seller, listings: Listing[]): Of
   if (!d.items.length || new Set(d.items.map(x => x.listingId)).size !== d.items.length) throw new RuleError('INVALID_ITEMS', 'Offer items are empty or duplicated.');
   const items = d.items.map(item => {
     const listing = listings.find(x => x.id === item.listingId && x.sellerId === seller.id);
-    if (!listing || listing.available < item.quantity) throw new RuleError('STOCK_UNAVAILABLE', 'An offer item is unavailable.');
+    if (!listing || listing.status && listing.status !== 'active' || listing.available < item.quantity) throw new RuleError('STOCK_UNAVAILABLE', 'An offer item is unavailable.');
     if (item.unitPriceCents < listing.floorCents || item.unitPriceCents > listing.listCents) throw new RuleError('POLICY_VIOLATION', 'The proposal violates this seller’s pricing policy.');
     return { listingId: listing.id, product: listing.product, quantity: item.quantity, unitPriceCents: item.unitPriceCents, listedUnitCents: listing.listCents };
   });
@@ -53,6 +53,7 @@ export function constraints(offer: OfferTerms, brief: Brief): string[] {
   if (offer.arrivalDays > brief.maxDays) reasons.push('Arrives after your deadline');
   if (brief.items) {
     for (const wanted of brief.items) {
+      if (wanted.productVersion && offer.items.some(i => i.product.id === wanted.productId && (i.product.version || 1) !== wanted.productVersion)) reasons.push('This product has changed. Review it and confirm your request again.');
       if (offer.items.filter(i => i.product.id === wanted.productId).reduce((n, i) => n + i.quantity, 0) !== wanted.quantity) reasons.push('The offer must include your selected products and quantities');
     }
     if (offer.items.some(i => !brief.items!.some(w => w.productId === i.product.id))) reasons.push('The offer includes an item you did not request');

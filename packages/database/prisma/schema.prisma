@@ -50,6 +50,11 @@ model Product {
   role String
   score Int
   description String @default("")
+  brand String @default("")
+  images String[] @default([])
+  sourceUrl String?
+  isDemo Boolean @default(true)
+  version Int @default(1)
   video String
   audio String
   mount String
@@ -65,6 +70,7 @@ model Listing {
   floorCents Int
   onHand Int
   reserved Int @default(0)
+  status String @default("active")
   reservations Reservation[]
 }
 model Offer {
