@@ -29,7 +29,7 @@ export async function acceptOffer(ownerId: string, offerId: string, commandKey: 
     if (!checked || constraints(checked, briefSchema.parse(room.brief)).length || checked.totalCents !== terms.totalCents) throw new RuleError('INELIGIBLE_OFFER', 'The offer no longer meets your requirements or stock availability.');
     const policyVersion = await ensurePolicyVersion(tx, seller.id);
     const briefVersion = await recordBrief(tx, room.id, room.version, room.brief, 'current_baseline');
-    const snapshot = { brief: room.brief, terms: checked, seller: { id: seller.id, name: seller.name, policyVersion: offer.policyVersion }, briefVersion: room.version, offerId: offer.id, merchantId: process.env.PAYPAL_EXPECTED_MERCHANT_ID || null, disclosures: 'Fictional products and delivery; PayPal sandbox only.' };
+    const snapshot = { brief: room.brief, terms: checked, seller: { id: seller.id, name: seller.name, policyVersion: offer.policyVersion }, briefVersion: room.version, offerId: offer.id, merchantId: process.env.PAYPAL_EXPECTED_MERCHANT_ID || null, disclosures: 'PayPal sandbox test payment only. This prototype does not arrange shipment or a live paid order.' };
     const checkout = await tx.checkout.create({ data: { id: randomUUID(), roomId: room.id, offerId, commandKey, buyerBriefVersionId: briefVersion.id, sellerPolicyVersionId: policyVersion.id, snapshot: json(snapshot), snapshotHash: createHash('sha256').update(JSON.stringify(snapshot)).digest('hex'), totalCents: checked.totalCents, expiresAt: new Date(Date.now() + 600_000) } });
     for (const item of checked.items) {
       await tx.listing.update({ where: { id: item.listingId }, data: { reserved: { increment: item.quantity } } });

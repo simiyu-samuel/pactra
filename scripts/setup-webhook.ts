@@ -1,0 +1,12 @@
+import '../packages/database/src/index';
+import { configureSandboxWebhook } from '../packages/integrations/src/paypal';
+import { readFile, writeFile, chmod } from 'node:fs/promises';
+const url = process.argv[2];
+if (!url) throw new Error('Supply the HTTPS URL ending /api/webhooks/paypal.');
+const hook = await configureSandboxWebhook(url);
+const path = '.env.local';
+const previous = await readFile(path, 'utf8');
+const setting = `PAYPAL_WEBHOOK_ID=${hook.id}`;
+await writeFile(path, /^PAYPAL_WEBHOOK_ID=.*$/m.test(previous) ? previous.replace(/^PAYPAL_WEBHOOK_ID=.*$/m, setting) : `${previous.trimEnd()}\n${setting}\n`, { mode: 0o600 });
+await chmod(path, 0o600);
+console.log(`Sandbox webhook registered at ${hook.url}. Local webhook ID saved. Restart web and worker to load it.`);

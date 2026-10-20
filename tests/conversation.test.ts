@@ -41,3 +41,10 @@ describe('buyer-visible negotiation conversations', () => {
     expect(conversationProgress('running', job(11, 'ready'), ['a'], now).state).toBe('complete');
   });
 });
+it('follows the admitted seller plan and reports the shorter round count',()=>{
+ const checkpoint={plan:{version:2,sellerIds:['only-seller'],rounds:2},counters:[]};
+ expect(conversationProgress('running',{...job(0),checkpoint},['irrelevant','only-seller'],now)).toMatchObject({actor:'seller',sellerId:'only-seller',round:1,totalRounds:2});
+ expect(conversationProgress('running',{...job(1),checkpoint},[],now)).toMatchObject({actor:'buyer',sellerId:null});
+ expect(conversationProgress('running',{...job(2),checkpoint},[],now)).toMatchObject({actor:'seller',sellerId:'only-seller',round:2});
+ expect(conversationProgress('running',{...job(3),checkpoint},[],now).state).toBe('complete');
+});

@@ -22,6 +22,13 @@ export async function assertProductsAvailable(brief: Brief, client: Pick<Tx, 'li
   if (!sellerIds.some(id => brief.items!.every(i => rows.some(l => l.sellerId === id && l.productId === i.productId && l.onHand - l.reserved >= i.quantity)))) throw new RuleError('PRODUCTS_UNAVAILABLE', 'No seller currently has every selected item in the quantities you need. Try fewer items or a smaller quantity.');
   return { ...brief, items: brief.items.map(i=>({...i,productVersion:rows.find(l=>l.productId===i.productId)!.product.version})) };
 }
+export async function negotiationCheckpoint(brief: Brief, client: Pick<Tx, 'seller'> = db) {
+  const sellers = await client.seller.findMany({ orderBy: { id: 'asc' }, include: { listings: { where: { status: 'active' }, include: { product: true } } } });
+  const eligible = sellers.filter(s => brief.items
+    ? brief.items.every(item => s.listings.some(l => l.productId === item.productId && l.onHand - l.reserved >= item.quantity))
+    : ['camera', 'microphone', 'tripod'].every(role => s.listings.some(l => l.product.role === role && l.onHand > l.reserved)));
+  return { plan: { version: 2 as const, sellerIds: eligible.map(s => s.id), rounds: 2 as const } };
+}
 export async function createNegotiation(ownerId: string, rawBrief: Brief, commandKey: string) {
   let brief = briefSchema.parse(rawBrief);
   return db.$transaction(async tx => {
@@ -38,8 +45,8 @@ export async function createNegotiation(ownerId: string, rawBrief: Brief, comman
     if (!allowance.remaining) throw new RuleError('SESSION_LIMIT', `You’ve started ${allowance.used} of ${allowance.limit} allowed negotiations in the past 24 hours. The next slot opens ${allowance.nextAvailableAt}. Reopen a recent room to continue without starting another.`, 429);
     const created = await tx.shoppingSession.create({ data: { id: commandKey, ownerId, brief: json(brief) } });
     await recordBrief(tx, created.id, 1, brief);
-    await tx.job.create({ data: { key: `${created.id}:1`, roomId: created.id, briefVersion: 1 } });
+    await tx.job.create({ data: { key: `${created.id}:1`, roomId: created.id, briefVersion: 1, checkpoint: json(await negotiationCheckpoint(brief, tx)) } });
     await event(tx, created.id, 'brief.confirmed', { message: 'Your request is saved. Your agent will now discuss the deal with sellers.' });
     return created;
-  });
+  }, {maxWait:5000, timeout:15000});
 }

@@ -30,7 +30,7 @@ const amount = (cents: number) => ({ currency_code: 'USD', value: (cents / 100).
 export async function createOrder(checkout: { id: string; snapshotHash: string; createKey: string }, terms: OfferTerms) {
   return request<PayPalOrder>('/v2/checkout/orders', 'POST', {
     intent: 'CAPTURE', purchase_units: [{ reference_id: checkout.id, custom_id: checkout.snapshotHash,
-      payee: { merchant_id: process.env.PAYPAL_EXPECTED_MERCHANT_ID }, description: 'Pactra fictional creator kit — sandbox demo',
+      payee: { merchant_id: process.env.PAYPAL_EXPECTED_MERCHANT_ID }, description: 'Pactra negotiated purchase — sandbox test',
       amount: { ...amount(terms.totalCents), breakdown: { item_total: amount(terms.subtotalCents), shipping: amount(terms.shippingCents) } },
       items: terms.items.map(x => ({ name: x.product.name, quantity: String(x.quantity), unit_amount: amount(x.unitPriceCents), category: 'PHYSICAL_GOODS' })) }],
     application_context: { shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' },
@@ -64,3 +64,21 @@ export async function verifyWebhook(headers: Headers, body: unknown) {
   });
   if (result.verification_status !== 'SUCCESS') throw new RuleError('INVALID_WEBHOOK', 'PayPal signature verification failed.', 400);
 }
+
+/** Register/reuse a sandbox listener without changing unrelated app webhooks. */
+export async function configureSandboxWebhook(url: string) {
+  const target = new URL(url);
+  if (target.protocol !== 'https:' || target.pathname !== '/api/webhooks/paypal' || target.search || target.hash || target.username || target.password) throw new RuleError('INVALID_WEBHOOK_URL', 'Use the exact HTTPS PayPal webhook URL.', 400);
+  const existing = await request<{ webhooks: Array<{ id: string; url: string }> }>('/v1/notifications/webhooks');
+  const found = existing.webhooks.find(w => w.url === target.href);
+  if (found) return found;
+  const wanted = ['CHECKOUT.ORDER.APPROVED', 'CHECKOUT.PAYMENT-APPROVAL.REVERSED', 'PAYMENT.CAPTURE.COMPLETED', 'PAYMENT.CAPTURE.PENDING', 'PAYMENT.CAPTURE.DECLINED', 'PAYMENT.CAPTURE.REFUNDED', 'PAYMENT.CAPTURE.REVERSED'];
+  const available = await request<{ event_types: Array<{ name: string }> }>('/v1/notifications/webhooks-event-types');
+  const event_types = wanted.filter(name => available.event_types.some(t => t.name === name)).map(name => ({ name }));
+  if (!event_types.some(t => t.name === 'PAYMENT.CAPTURE.COMPLETED')) throw new RuleError('WEBHOOK_EVENTS_UNAVAILABLE', 'PayPal capture events could not be confirmed.', 502);
+  return request<{ id: string; url: string }>('/v1/notifications/webhooks', 'POST', { url: target.href, event_types });
+}
+
+export type PayPalRefund = { id: string; status: string; amount: { currency_code: string; value: string }; links?: Array<{ rel: string; href: string }> };
+export const refundCapture = (captureId: string, totalCents: number, key: string) => request<PayPalRefund>(`/v2/payments/captures/${encodeURIComponent(captureId)}/refund`, 'POST', { amount: amount(totalCents) }, key);
+export const getRefund = (id: string) => request<PayPalRefund>(`/v2/payments/refunds/${encodeURIComponent(id)}`);

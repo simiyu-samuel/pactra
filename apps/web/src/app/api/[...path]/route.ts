@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
 import { briefSchema, constraints, utility, RuleError, publicNegotiationEvent, conversationProgress, type OfferTerms } from '@pactra/domain';
-import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, assertProductsAvailable, duffelConfigured, searchFlights, refreshFlight, receivePayPalWebhook } from '@pactra/integrations';
+import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, assertProductsAvailable, negotiationCheckpoint, buyerOrders, requestOrderRefund, duffelConfigured, searchFlights, refreshFlight, receivePayPalWebhook } from '@pactra/integrations';
 import { z } from 'zod';
 import { ownerApi } from '../../../server/owner-api';
 
@@ -135,7 +135,7 @@ async function dispatch(req: NextRequest, path: string[]) {
         await tx.job.updateMany({ where: { roomId: id, state: { in: ['ready', 'running'] } }, data: { state: 'cancelled', leaseUntil: null } });
         const result = await tx.shoppingSession.update({ where: { id }, data: { version: { increment: 1 }, brief: json(confirmed), state: 'queued' } });
         await recordBrief(tx, id, result.version, confirmed);
-        await tx.job.create({ data: { key: `${id}:${result.version}`, roomId: id, briefVersion: result.version } });
+        await tx.job.create({ data: { key: `${id}:${result.version}`, roomId: id, briefVersion: result.version, checkpoint: json(await negotiationCheckpoint(confirmed, tx)) } });
         await event(tx, id, 'brief.revised', { message: 'Brief updated. Old offers cannot be selected for the new requirements.' });
         return result;
       });
@@ -157,12 +157,13 @@ async function dispatch(req: NextRequest, path: string[]) {
       const checkouts = await db.checkout.findMany({ where: { roomId: id }, select: { id: true, state: true, totalCents: true }, orderBy: { createdAt: 'desc' } });
       const briefHistory = await db.buyerBriefVersion.findMany({ where: { roomId: id }, orderBy: { version: 'asc' }, select: { version: true, brief: true, createdAt: true, source: true } });
       const [job, sellers] = await Promise.all([
-        db.job.findUnique({ where: { key: `${id}:${room.version}` }, select: { state: true, step: true, runAt: true, leaseUntil: true } }),
+        db.job.findUnique({ where: { key: `${id}:${room.version}` }, select: { state: true, step: true, runAt: true, leaseUntil: true, checkpoint: true } }),
         db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true } }),
       ]);
-      return ok({ ...room, offers: projected, events: events.reverse().map(publicNegotiationEvent), progress: conversationProgress(room.state, job, sellers.map(s => s.id)), checkouts, briefHistory });
+      return ok({ ...room, participants: (job?.checkpoint as {plan?:{sellerIds:string[]}})?.plan?.sellerIds || sellers.map(s=>s.id), offers: projected, events: events.reverse().map(publicNegotiationEvent), progress: conversationProgress(room.state, job, sellers.map(s => s.id)), checkouts, briefHistory });
     }
   }
+  if (resource === 'orders' && !id && req.method === 'GET') return ok({orders:await buyerOrders(await owner(req))});
   if (resource === 'checkouts' && !id && req.method === 'POST') {
     const ownerId = await owner(req);
     if (!paymentConfigured()) throw new RuleError('PAYPAL_NOT_CONFIGURED', 'PayPal sandbox credentials are needed before reserving a paid checkout.', 503);
@@ -172,7 +173,9 @@ async function dispatch(req: NextRequest, path: string[]) {
   }
   if (resource === 'checkouts' && id) {
     const checkout = await ownedCheckout(req, id);
-    if (req.method === 'GET' && !action) return ok({ id: checkout.id, roomId: checkout.roomId, state: checkout.state, snapshot: checkout.snapshot, snapshotHash: checkout.snapshotHash, totalCents: checkout.totalCents, paypalOrderId: checkout.paypalOrderId, captureId: checkout.captureId, expiresAt: checkout.expiresAt, clientId: process.env.PAYPAL_CLIENT_ID || null });
+    if (req.method === 'GET' && !action) return ok({ id: checkout.id, roomId: checkout.roomId, state: checkout.state, snapshot: checkout.snapshot, snapshotHash: checkout.snapshotHash, totalCents: checkout.totalCents, paypalOrderId: checkout.paypalOrderId, captureId: checkout.captureId, expiresAt: checkout.expiresAt, refund: await db.refundRequest.findUnique({where:{checkoutId:id},select:{id:true,reason:true,state:true,providerRefundId:true}}), clientId: process.env.PAYPAL_CLIENT_ID || null });
+    if (req.method === 'POST' && action === 'refund-request') return ok(await requestOrderRefund(id, await body(req), await owner(req)));
+    if (req.method === 'POST' && action === 'check') {await reconcileCheckout(id);return ok({checked:true});}
     if (req.method === 'POST' && action === 'paypal-order') return ok(await ensureOrder(id));
     if (req.method === 'POST' && action === 'capture') {
       const input = z.object({ orderId: z.string().min(1) }).parse(await body(req));

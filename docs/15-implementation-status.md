@@ -2,6 +2,16 @@
 
 Updated October 20, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
 
+## Faster negotiations and order payments — October 20
+
+New jobs negotiate only with sellers able to supply the selected basket. One opening/counter/response cycle takes three AI calls for one eligible seller; existing jobs keep their original plan. Compact contexts, ready-job scheduling, lease fencing and idle-only delay reduce avoidable waiting. Payment recovery runs independently of model calls. Room participants and round counts reflect the admitted plan.
+
+A measured live AeroPress negotiation completed in 4.710 seconds with its first offer at 2.450 seconds; the total moved from $46 to $43 including delivery. Earlier sampled eleven-call runs took about 130–135 seconds. This is a single local run with available quota. The first development admission attempt rolled back on a transaction timeout; a bounded 15-second admission transaction and retry of its original command key created one room.
+
+Buyer agreement history and seller Orders & payments show immutable terms, savings against the recorded asking total with the same delivery, and actual payment references. An additive full-refund workflow requires a buyer/seller request and separate seller approval, durable provider keys, verified full-amount evidence, pending/review states and recovery. It never automatically restores stock. The Groq order assistant can explain, check payment or prepare a draft; it cannot execute payments or refunds. See [the guide](23-speed-and-payment-journey.md).
+
+All 118 regression tests passed against isolated PostgreSQL with provider stubs; strict TypeScript and the final optimized production build passed. Desktop and actual 390px mobile agreement history were reviewed without document horizontal overflow. Production page/readiness checks, local seller authentication, projection redaction and forged-origin rejection passed. The local ngrok webhook was registered with PayPal, its verification ID saved in ignored local configuration, and the web/worker restarted. A webhook-only proxy rejects other paths and unsigned deliveries. Actual sandbox approval/capture, signed notification processing and live refund evidence remain separate checks; the measured $43 agreement remained unpaid and its reservation expired while awaiting user approval. A fresh approval is required for the next sandbox attempt. Polling no longer tears down PayPal’s SDK when a reservation changes to awaiting approval. A live order-assistant export to Groq was rejected by automatic approval review; assistant actions are verified with model stubs. Render deployment remains pending.
+
 ## Agent negotiation hero — October 20
 
 The homepage now uses a full-width generated background showing two humanoid buyer/seller agents negotiating over headphones. Illustrated $79/$88 offers include delivery and warranty terms. The headline and buyer/seller actions remain readable HTML; a portrait image serves phones and a tablet layout preserves both agents. The artwork is explicitly identified as an illustration. Catalog pricing, stock, publication status and payment behavior are unchanged. See [the hero guide](22-agent-hero.md) for assets and complete prompts.

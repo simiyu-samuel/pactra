@@ -1,14 +1,14 @@
 # Render readiness — October 20, 2026
 
-The application and catalog-management build are ready for staging preparation. No Render resources have been created and no deployment has been triggered. The remaining hackathon release gates are catalog approval, real sandbox payment completion/webhook evidence, and staging smoke checks.
+The application and catalog-management build are ready for staging preparation. No Render resources have been created and no deployment has been triggered. The owner has confirmed and published six Pixel Port listings. The remaining hackathon release gates are real sandbox payment completion/webhook evidence, staging smoke checks, and submission materials.
 
 ## Required before release
 
 | Item | Next action |
 | --- | --- |
-| Owner catalog approval | Confirm exact products, usable photos, asking/private minimum prices, stock, delivery and warranty; publish reviewed listings. Public catalog stays empty until then. |
+| Owner catalog approval | Completed locally: six owner-approved Pixel Port listings are published. Preserve those prices/stock; review other shop drafts before publishing. Copying local catalog data to staging requires a deliberate transfer. |
 | PayPal sandbox end-to-end evidence | Complete a buyer-approved sandbox payment, confirm captured amount/recipient, and retain its receipt. Existing provider authentication/order-creation and stubbed recovery tests do not prove buyer approval/capture. |
-| Public webhook | Register `https://<chosen-web-host>/api/webhooks/paypal`, configure its matching `PAYPAL_WEBHOOK_ID`, and verify signed delivery plus durable processing/reconciliation with the worker. The local webhook ID is currently unset. |
+| Public webhook | Register `https://<chosen-web-host>/api/webhooks/paypal`, configure its matching `PAYPAL_WEBHOOK_ID`, and verify signed delivery plus durable processing/reconciliation with the worker. A local ngrok webhook and matching ID are configured for testing; register the deployment HTTPS URL separately. See document 23. |
 | Render setup and smoke test | Select service/database plans and region, configure secrets and exact public origin, migrate/bootstrap the database once, run web and worker, verify health/owner access, negotiation completion and payment recovery. |
 | Hackathon submission | Record the final working core flow and complete repository/submission materials against the supplied rules. |
 

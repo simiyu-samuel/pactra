@@ -68,6 +68,7 @@ export async function processPaymentEvent() {
         await lockCheckout(tx, checkout.id);
         const current = await tx.checkout.findUniqueOrThrow({ where: { id: checkout.id } });
         const state = payload.event_type.endsWith('REVERSED') ? 'reversed' : 'refunded';
+        if(state==='refunded') await tx.refundRequest.updateMany({where:{checkoutId:current.id,state:{not:'completed'}},data:{state:'completed',providerRefundId:text(payload.resource.id)||undefined,operationAt:null}});
         // Reversal takes precedence over refund when delivery is reordered. Neither restores inventory.
         if (current.state === 'paid' || current.state === 'refunded' && state === 'reversed') {
           await tx.checkout.update({ where: { id: current.id }, data: { state } });

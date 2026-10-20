@@ -20,7 +20,9 @@
     "verify:discovery": "tsx scripts/verify-discovery.ts",
     "verify:flights": "tsx scripts/verify-flights.ts",
     "status:payments": "tsx scripts/payment-status.ts",
-    "catalog:prepare": "tsx scripts/prepare-catalog.ts"
+    "catalog:prepare": "tsx scripts/prepare-catalog.ts",
+    "webhook:proxy": "node scripts/webhook-proxy.mjs",
+    "webhook:setup": "tsx scripts/setup-webhook.ts"
   },
   "devDependencies": {
     "tsx": "4.23.15",

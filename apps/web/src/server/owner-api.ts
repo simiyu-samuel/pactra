@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@pactra/database';
-import { loginOwner, logoutOwner, requireOwner, ownerConfigured, ownerSessionSeconds, publishPolicy, addSellerProduct, updateSellerProduct } from '@pactra/integrations';
+import { loginOwner, logoutOwner, requireOwner, ownerConfigured, ownerSessionSeconds, publishPolicy, addSellerProduct, updateSellerProduct, sellerOrders, requestOrderRefund, approveOrderRefund, assistOrder, reconcileCheckout } from '@pactra/integrations';
 import { RuleError } from '@pactra/domain';
 import { z } from 'zod';
 
@@ -29,6 +29,21 @@ export async function ownerApi(req: NextRequest, path: string[], readBody: () =>
     return response;
   }
   const owner = await requireOwner(token);
+  if (path.length === 3 && path[0] === 'sellers' && path[2] === 'orders' && req.method === 'GET') return reply({orders:await sellerOrders(path[1])});
+  if (path.length === 3 && path[0] === 'orders' && req.method === 'POST') {
+    const checkout=await db.checkout.findUnique({where:{id:path[1]}});
+    if(!checkout)throw new RuleError('NOT_FOUND','Order not found.',404);
+    if(path[2]==='check') {await reconcileCheckout(checkout.id);return reply({checked:true});}
+    if(path[2]==='refund-request')return reply(await requestOrderRefund(checkout.id,await readBody()));
+    if(path[2]==='refund') {
+      const input=z.object({requestId:z.uuid(),expectedTotalCents:z.number().int().positive()}).strict().parse(await readBody());
+      return reply(await approveOrderRefund(checkout.id,input.requestId,input.expectedTotalCents,owner.id));
+    }
+    if(path[2]==='assistant') {
+      const input=z.object({question:z.string().trim().min(5).max(240)}).strict().parse(await readBody());
+      return reply(await assistOrder(checkout.id,input.question));
+    }
+  }
   if (path.length === 1 && path[0] === 'sellers' && req.method === 'GET') {
     const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, include: { listings: { orderBy: { id: 'asc' }, include: { product: true } }, policyVersions: { orderBy: { version: 'desc' }, take: 20, select: { id: true, version: true, note: true, source: true, createdAt: true, snapshot: true } } } });
     return reply({ sellers });

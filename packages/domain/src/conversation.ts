@@ -6,7 +6,7 @@ export type ConversationData = {
 export type ConversationEvent = { id: string; type: string; data: ConversationData; createdAt: string };
 export type NegotiationProgress = {
   state: 'working' | 'waiting' | 'paused' | 'complete'; actor: 'buyer' | 'seller' | null;
-  sellerId: string | null; round: number | null;
+  sellerId: string | null; round: number | null; totalRounds?: number;
 };
 const notices: Record<string, string> = {
   'brief.confirmed': 'Your request is confirmed. Your agent will discuss the deal with sellers.',
@@ -46,13 +46,24 @@ export function currentConversation(events: ConversationEvent[], version: number
   for (let i = events.length - 1; i >= 0; i--) if (events[i].type === 'brief.revised' || events[i].type === 'brief.confirmed') { start = i; break; }
   return events.slice(Math.max(0, start)).filter(e => !e.data.briefVersion || e.data.briefVersion === version);
 }
-export function conversationProgress(roomState: string, job: { state: string; step: number; runAt: Date; leaseUntil: Date | null } | null, sellerIds: string[], now = Date.now()): NegotiationProgress {
-  if (!['queued', 'running'].includes(roomState) || (job && job.step >= 11) || job?.state === 'done' || job?.state === 'cancelled') return { state: 'complete', actor: null, sellerId: null, round: null };
+export type NegotiationPlan = { version: 2; sellerIds: string[]; rounds: 2 };
+export function negotiationTurn(step: number, checkpoint: unknown, legacySellerIds: string[]) {
+  const plan = (checkpoint as { plan?: NegotiationPlan } | null)?.plan;
+  if (plan?.version === 2 && plan.rounds === 2 && Array.isArray(plan.sellerIds) && plan.sellerIds.every(id => typeof id === 'string')) {
+    const ids = [...new Set(plan.sellerIds)];
+    const totalSteps = ids.length ? ids.length * 2 + 1 : 0;
+    return { complete: step >= totalSteps, buyer: step === ids.length, sellerId: step < ids.length ? ids[step] : ids[step - ids.length - 1], round: step <= ids.length ? 1 : 2, totalSteps, totalRounds: 2 };
+  }
+  // Existing jobs retain their original three-round schedule and checkpoint format.
+  return { complete: step >= 11, buyer: step === 3 || step === 7, sellerId: legacySellerIds[step % 4], round: Math.floor(step / 4) + 1, totalSteps: 11, totalRounds: 3 };
+}
+export function conversationProgress(roomState: string, job: { state: string; step: number; runAt: Date; leaseUntil: Date | null; checkpoint?: unknown } | null, sellerIds: string[], now = Date.now()): NegotiationProgress {
+  const turn = negotiationTurn(job?.step || 0, job?.checkpoint, sellerIds);
+  if (!['queued', 'running'].includes(roomState) || (job && turn.complete) || job?.state === 'done' || job?.state === 'cancelled') return { state: 'complete', actor: null, sellerId: null, round: null };
   if (!job) return { state: 'waiting', actor: null, sellerId: null, round: null };
-  const buyer = job.step === 3 || job.step === 7;
   return {
     state: job.state === 'ready' && +job.runAt > now ? 'paused' : job.state === 'running' && job.leaseUntil && +job.leaseUntil > now ? 'working' : 'waiting',
-    actor: buyer ? 'buyer' : 'seller', sellerId: buyer ? null : sellerIds[job.step % 4] || null, round: Math.floor(job.step / 4) + 1,
+    actor: turn.buyer ? 'buyer' : 'seller', sellerId: turn.buyer ? null : turn.sellerId || null, round: turn.round, totalRounds: turn.totalRounds,
   };
 }
 

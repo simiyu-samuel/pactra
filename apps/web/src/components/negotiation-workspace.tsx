@@ -133,7 +133,7 @@ export default function NegotiationWorkspace({ room, sellers, connected, childre
           </div>
           {pending > 0 && <button className={s.latest} onClick={jumpToLatest}><ArrowDown size={13}/>{pending} new {pending === 1 ? 'update' : 'updates'}</button>}
         </div>
-        <div className={`${s.progress} ${active && connected && progress?.state === 'working' ? s.working : ''}`} role="status"><ArrowRight size={15}/><span>{progressText}</span>{active && progress?.round && <small>{progress.round}/3</small>}</div>
+        <div className={`${s.progress} ${active && connected && progress?.state === 'working' ? s.working : ''}`} role="status"><ArrowRight size={15}/><span>{progressText}</span>{active && progress?.round && <small>{progress.round}/{progress.totalRounds || 3}</small>}</div>
         <footer className={s.footer}><span>You choose. You approve.</span><a href="#negotiation-offers" onClick={() => { setMinimized(true); setExpanded(false); }}>Compare offers <ArrowRight size={13}/></a></footer>
       </aside>
       <button ref={launcher} className={s.launcher} onClick={() => { setMinimized(false); setExpanded(true); }} aria-label="Open live negotiation" aria-expanded={!minimized && expanded}>
