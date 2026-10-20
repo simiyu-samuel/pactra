@@ -132,3 +132,7 @@ See [negotiation first](18-negotiation-first.md) for the current scope. New buye
 ## Real catalog management (October 20)
 
 `POST /api/owner/sellers/:sellerId/products` creates a real product and listing; default status is `draft`. Input includes brand, description, category, up to four HTTPS images, optional source URL, asking/private minimum cents, stock, command key and expected seller version. Publishing (`status: active`) requires a photo, asking price and owner confirmation. `POST /api/owner/sellers/:sellerId/products/:listingId` edits it with additional expected product version and current on-hand/reserved counts. `archived` hides a listing; it does not delete history. Draft/archived/sample listings never enter public bootstrap. Seller-rule publishing submits only non-archived listings, while saved snapshots retain all historical listings. Brief item entries now capture optional `productVersion`, which the server fills on confirmation. Existing legacy rooms remain readable. See [catalog review](19-catalog-review.md).
+
+## Live conversation projection
+
+Owned room reads include `progress: {state, actor, sellerId, round}` derived from the current version’s durable job. Room events (up to 100 recent records) and the existing SSE route use the same allowlisted public projection. Raw model messages and private payload fields are not returned. New proposal events include arrival days, warranty months and request version; legacy events remain compatible. See [the live window](21-live-negotiation-window.md).

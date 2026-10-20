@@ -57,7 +57,7 @@ async function step(job: Work) {
     const offers = await db.offer.findMany({ where: { roomId: room.id, briefVersion: room.version, status: 'active' }, select: { sellerId: true, policyVersion: true, terms: true, seller: { select: { policyVersion: true } } } });
     const counters = await decide<Counters>('You represent a buyer in Pactra. Propose one concise counter for each seller with an offer. Respect the confirmed products and quantities. For earlier requests without selected products, keep the original 4K camera, compatible microphone and tripod requirement. For selected product IDs, keep the exact products and quantities; ask for price or delivery improvements. For earlier camera-kit requests, permitted substitutions are allowed. Your buyer budget is private; propose a target without revealing the hard maximum. Do not invent product facts or claim payment. For exact products, preference quality means balancing price with earlier delivery; price means prioritising the lowest total. Return the requested JSON only.', { brief, offers: offers.filter(o => o.policyVersion === o.seller.policyVersion).map(({ sellerId, terms }) => ({ sellerId, terms })), round }, counterJson);
     if (!Array.isArray(counters.counters) || counters.counters.some(x => !sellers.some(s => s.id === x.sellerId) || !Number.isInteger(x.targetCents) || x.targetCents < 0 || typeof x.message !== 'string' || x.message.length > 400)) throw new Error('Invalid buyer counter.');
-    return commitStep(job, async tx => { for (const c of counters.counters) await event(tx, room.id, 'buyer.countered', { sellerId: c.sellerId, message: c.message, targetCents: c.targetCents }); }, counters);
+    return commitStep(job, async tx => { for (const c of counters.counters) await event(tx, room.id, 'buyer.countered', { sellerId: c.sellerId, message: c.message, targetCents: c.targetCents, round, briefVersion: job.briefVersion }); }, counters);
   }
   const seller = sellers[job.step % 4];
   const previous = await db.offer.findFirst({ where: { roomId: room.id, sellerId: seller.id, briefVersion: room.version, policyVersion: seller.policyVersion, status: 'active' }, orderBy: { createdAt: 'desc' } });
@@ -75,8 +75,8 @@ async function step(job: Work) {
     if (decision.action !== 'hold') await tx.offer.updateMany({ where: { roomId: room.id, sellerId: seller.id, briefVersion: room.version, status: 'active' }, data: { status: 'superseded' } });
     if (terms) {
       const offer = await tx.offer.create({ data: { roomId: room.id, sellerId: seller.id, briefVersion: room.version, policyVersion: seller.policyVersion, round, terms: json(terms), expiresAt: new Date(Date.now() + 600_000) } });
-      await event(tx, room.id, 'offer.published', { sellerId: seller.id, offerId: offer.id, round, totalCents: terms.totalCents, message: terms.message });
-    } else await event(tx, room.id, `seller.${decision.action}`, { sellerId: seller.id, message: decision.message });
+      await event(tx, room.id, 'offer.published', { sellerId: seller.id, offerId: offer.id, round, totalCents: terms.totalCents, arrivalDays: terms.arrivalDays, warrantyMonths: terms.warrantyMonths, briefVersion: job.briefVersion, message: terms.message });
+    } else await event(tx, room.id, `seller.${decision.action}`, { sellerId: seller.id, round, briefVersion: job.briefVersion, message: decision.action === 'hold' ? 'The seller kept their current proposal.' : 'The seller could not offer a deal for this request.' });
   });
 }
 

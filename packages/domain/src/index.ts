@@ -98,3 +98,6 @@ export const sellerDecisionJson = {
 export type { DiscoverySource, MarketOffer, DiscoveryResult } from './discovery';
 export { flightSearchSchema, shiftedFlightDates, durationMinutes } from './flights';
 export type { FlightQuery, FlightSegment, FlightLeg, FlightOffer, FlightResult } from './flights';
+
+export { publicNegotiationEvent, currentConversation, conversationProgress, conversationThread } from './conversation';
+export type { ConversationData, ConversationEvent, NegotiationProgress } from './conversation';

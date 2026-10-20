@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { db, event, json, lockRoom } from '@pactra/database';
-import { briefSchema, constraints, utility, RuleError, type OfferTerms } from '@pactra/domain';
+import { briefSchema, constraints, utility, RuleError, publicNegotiationEvent, conversationProgress, type OfferTerms } from '@pactra/domain';
 import { acceptOffer, ensureOrder, payCheckout, cancelCheckout, unresolvedStates, paymentConfigured, reconcileCheckout, decide, QuotaWait, recordBrief, discover, refreshChannel3Product, createNegotiation, negotiationAllowance, assertProductsAvailable, duffelConfigured, searchFlights, refreshFlight, receivePayPalWebhook } from '@pactra/integrations';
 import { z } from 'zod';
 import { ownerApi } from '../../../server/owner-api';
@@ -112,7 +112,7 @@ async function dispatch(req: NextRequest, path: string[]) {
           if (closed) return;
           try {
             const events = await db.roomEvent.findMany({ where: { roomId: id, sequence: { gt: cursor } }, orderBy: { sequence: 'asc' }, take: 50 });
-            for (const e of events) { if (closed) return; controller.enqueue(encoder.encode(`id: ${e.sequence}\ndata: ${JSON.stringify(e)}\n\n`)); cursor = e.sequence; }
+            for (const e of events) { if (closed) return; controller.enqueue(encoder.encode(`id: ${e.sequence}\ndata: ${JSON.stringify(publicNegotiationEvent(e))}\n\n`)); cursor = e.sequence; }
             if (!closed) controller.enqueue(encoder.encode(': heartbeat\n\n'));
           } catch { finish(); return; }
           if (Date.now() - started > 55_000) { finish(); return; }
@@ -153,10 +153,14 @@ async function dispatch(req: NextRequest, path: string[]) {
         if (o.status !== 'locked' && terms.items.some(x => (currentStock.get(x.listingId) ?? 0) < x.quantity)) reasons.push('An item is no longer available');
         return { id: o.id, sellerId: o.sellerId, sellerName: o.seller.name, round: o.round, terms, status: o.status, reasons, score: reasons.length ? -1 : utility(terms, brief) };
       }).sort((a, b) => b.score - a.score || a.terms.totalCents - b.terms.totalCents || a.id.localeCompare(b.id));
-      const events = await db.roomEvent.findMany({ where: { roomId: id }, orderBy: { sequence: 'desc' }, take: 40 });
+      const events = await db.roomEvent.findMany({ where: { roomId: id }, orderBy: { sequence: 'desc' }, take: 100 });
       const checkouts = await db.checkout.findMany({ where: { roomId: id }, select: { id: true, state: true, totalCents: true }, orderBy: { createdAt: 'desc' } });
       const briefHistory = await db.buyerBriefVersion.findMany({ where: { roomId: id }, orderBy: { version: 'asc' }, select: { version: true, brief: true, createdAt: true, source: true } });
-      return ok({ ...room, offers: projected, events: events.reverse(), checkouts, briefHistory });
+      const [job, sellers] = await Promise.all([
+        db.job.findUnique({ where: { key: `${id}:${room.version}` }, select: { state: true, step: true, runAt: true, leaseUntil: true } }),
+        db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true } }),
+      ]);
+      return ok({ ...room, offers: projected, events: events.reverse().map(publicNegotiationEvent), progress: conversationProgress(room.state, job, sellers.map(s => s.id)), checkouts, briefHistory });
     }
   }
   if (resource === 'checkouts' && !id && req.method === 'POST') {

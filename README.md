@@ -2,7 +2,7 @@
 
 **Your agent negotiates. You make the call.**
 
-Pactra gives buyers and sellers their own negotiating agents. Buyers select products, quantities, budget and delivery limits. Sellers set asking prices, private minimum prices, stock and delivery options. Their agents exchange offers; the buyer compares the complete terms and approves the exact agreed PayPal test payment. External store search and flights are optional discovery tools.
+Pactra gives buyers and sellers their own negotiating agents. Buyers select products, quantities, budget and delivery limits. Sellers set asking prices, private minimum prices, stock and delivery options. Their agents exchange offers in a live conversation window with separate seller threads and a pinned deal summary; the buyer compares the complete terms and approves the exact agreed PayPal test payment. External store search and flights are optional discovery tools.
 
 The current approved direction is [negotiation first](docs/18-negotiation-first.md). The marketplace supports any seller-listed product category. Six real branded product references with manufacturer photos are prepared as private drafts in each seller workspace. Owner review sets prices, private minimums, stock and delivery before publication. See [catalog review](docs/19-catalog-review.md).
 
@@ -128,3 +128,5 @@ Source repository: [simiyu-samuel/pactra](https://github.com/simiyu-samuel/pactr
 ## Review products and prepare deployment
 
 Open `/seller-console` and choose a shop. Products can be saved as drafts, published, edited or archived, with up to four photos and a manufacturer source link. Existing accepted agreements preserve their original terms. Prices and stock are not inferred from manufacturer pages. [Catalog guide](docs/19-catalog-review.md) · [Render readiness and commands](docs/20-render-readiness.md).
+
+The [live negotiation window](docs/21-live-negotiation-window.md) follows real buyer/seller exchanges, preserves private pricing context, and opens as a floating desktop panel or mobile sheet.
