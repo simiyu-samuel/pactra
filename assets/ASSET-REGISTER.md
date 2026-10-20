@@ -10,7 +10,7 @@
 | Hackathon reference summary | Written | Paraphrase of the user-supplied overview; organizer rules remain authoritative |
 | Architecture diagrams | Embedded Mermaid in docs | Original diagrams, editable with the plan |
 | Logo and favicon | Not created | Develop original vector mark after the brand direction is reviewed |
-| Product illustrations | Created as native SVG | Original camera, microphone, tripod, light and storage illustrations in product-art.tsx; fictional equipment only |
+| Product illustrations | Original generated concepts and earlier native SVG | Five equipment WebP concepts for the fictional catalog; earlier native SVG source retained |
 | Application screenshots | Created in `previews/` | Desktop/mobile captures from the running first build; no live AI/payment outcome is represented |
 | Demo video and narration | Not created | Record the working build; no copyrighted background music |
 
@@ -27,3 +27,9 @@ Flight screenshots in `previews/pactra-flights-*.jpg` are original local browser
 `previews/pactra-duffel-test-*.jpg` captures actual provider test responses in the local production app on October 19, 2026, including successful refresh and two-fare comparison. All displayed fares are Duffel test data and are not evidence of real availability or bookable prices.
 
 `previews/pactra-payment-*-fixture.jpg` contains original browser captures of synthetic receipt UI records in the isolated test database. The `UI-FIXTURE-NO-PAYPAL-*` references and fictional camera label deliberately identify display fixtures. These screenshots are not real PayPal transactions, captures, refunds or reversals. The test records were removed after desktop/mobile verification.
+
+## Warm editorial redesign — October 20, 2026
+
+Seven original built-in `image_gen` images are bundled under `apps/web/public/images/`: `creator-studio.webp`, `coastal-escape.webp`, `camera-concept.webp`, `audio-concept.webp`, `tripod-concept.webp`, `light-concept.webp`, and `storage-concept.webp`. Final prompts, paths and intended uses are recorded in [brand/image-prompts.json](brand/image-prompts.json). WebP delivery copies total approximately 908 KB. The creator and coast images are campaign inspiration; equipment images are labeled fictional concepts and are not photographs of exact products. No generated image represents a payment outcome, provider inventory or actual flight availability. Existing external retailer images remain provider-supplied remote media.
+
+`previews/pactra-editorial-*.jpg` are original browser captures of the redesigned local app. Storefront/agent/coastal views show original campaign or fictional concept imagery. `pactra-editorial-channel3.jpg` displays time-specific retailer data returned by Channel3. `*-fixture.jpg` captures show synthetic isolated test offers and receipts with explicit fixture identifiers, not actual payment or negotiation outcomes. The isolated records were removed after verification.

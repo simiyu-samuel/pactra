@@ -1,0 +1,51 @@
+[
+  {
+    "key": "pactra_creator",
+    "prompt": "Use case: photorealistic-natural. Asset type: editorial lifestyle photography for Pactra, a consumer shopping marketplace for creative equipment. Create a polished photorealistic campaign photograph, landscape 3:2 composition. A stylish young adult Black woman creator, natural facial features and authentic joyful focus, setting up an unbranded compact mirrorless camera on a small tripod in a sunlit contemporary creative studio. She wears a vivid burnt-orange overshirt with an ivory T-shirt. Warm terracotta accents, pale ivory plaster wall, a single green plant, oak desk, natural shadows, subtle film grain. Medium-wide composition, creator and camera occupy the right two thirds, left third simple and quiet. Camera equipment believable and unbranded. Realistic hands and proportions, tactile candid editorial quality, not glossy stock-photo posing. No text, no logos, no watermark. This is an aspirational campaign scene, not a product listing or UI mockup.",
+    "savedPath": "apps/web/public/images/creator-studio.webp",
+    "mode": "built-in image_gen",
+    "use": "Original aspirational campaign art; not a product or destination availability claim."
+  },
+  {
+    "key": "pactra_travel",
+    "prompt": "Use case: photorealistic-natural. Asset type: immersive travel hero photograph for Pactra flight discovery. Landscape 3:2 high-end editorial travel photography from a rocky Mediterranean coastal viewpoint: a tiny picturesque terracotta-roof village, cypress trees, sunlit ivory cliffs curving into luminous turquoise water, warm late-afternoon sun, restrained natural film grain. A sense of possibility and open air. Strong visual depth with a foreground branch and expansive water. Rich but natural color, crisp architectural detail. No people close-up, no aircraft, no text, no logos, no watermark, no user interface. Travel inspiration only, do not portray a specific bookable destination package.",
+    "savedPath": "apps/web/public/images/coastal-escape.webp",
+    "mode": "built-in image_gen",
+    "use": "Original aspirational campaign art; not a product or destination availability claim."
+  },
+  {
+    "key": "pactra_camera",
+    "prompt": "Use case: product-mockup. Asset type: illustrative product concept photograph for a fictional creator equipment demo catalog. One unbranded compact black mirrorless camera with a substantial short lens, three-quarter angle, on a pale warm ivory studio surface. The camera is generic fictional equipment, without any readable markings. Subtle orange backdrop accent far behind it. Square composition, product centered with generous breathing room, front-low 50mm lens editorial still life, warm directional daylight, realistic soft contact shadows and fine material detail, tasteful premium consumer retail photography. Ivory, charcoal and restrained burnt-orange color palette. No logos, no legible text, no prices, no watermarks, no UI. This depicts a fictional concept, not a real branded product.",
+    "savedPath": "apps/web/public/images/camera-concept.webp",
+    "mode": "built-in image_gen",
+    "use": "Illustrative concept for fictional native catalog items; not an exact product photograph."
+  },
+  {
+    "key": "pactra_audio",
+    "prompt": "Use case: product-mockup. Asset type: illustrative product concept photograph for a fictional creator equipment demo catalog. An unbranded compact creator microphone kit: two small matte-black clip-on microphones, a discreet compact receiver and a neatly curved short 3.5mm audio cable, arranged on pale warm ivory paper. Believable miniature hardware, one tasteful terracotta block behind them. Square composition, product centered with generous breathing room, front-low 50mm lens editorial still life, warm directional daylight, realistic soft contact shadows and fine material detail, tasteful premium consumer retail photography. Ivory, charcoal and restrained burnt-orange color palette. No logos, no legible text, no prices, no watermarks, no UI. This depicts a fictional concept, not a real branded product.",
+    "savedPath": "apps/web/public/images/audio-concept.webp",
+    "mode": "built-in image_gen",
+    "use": "Illustrative concept for fictional native catalog items; not an exact product photograph."
+  },
+  {
+    "key": "pactra_tripod",
+    "prompt": "Use case: product-mockup. Asset type: illustrative concept photograph for a fictional creator equipment catalog. One compact unbranded matte-black tabletop mini tripod, fully visible including all three short sturdy legs and a ball head with a standard quarter-inch mounting screw, photographed at three-quarter view, on pale ivory paper with a warm peach backdrop. Square composition, object centered with generous breathing room, premium consumer retail still life, tactile materials and realistic proportions, warm soft directional daylight and realistic contact shadows. Editorial natural photography, consistent ivory, charcoal and muted earthy palette. No logos, no readable text, no prices, no watermarks, no UI. Fictional equipment illustration, not a real listing photograph.",
+    "savedPath": "apps/web/public/images/tripod-concept.webp",
+    "mode": "built-in image_gen",
+    "use": "Illustrative concept for fictional native catalog items; not an exact product photograph."
+  },
+  {
+    "key": "pactra_light",
+    "prompt": "Use case: product-mockup. Asset type: illustrative concept photograph for a fictional creator equipment catalog. One unbranded small rectangular portable LED video light with a softly glowing cream diffuser and black frame on a very short tabletop stand, fully visible, on pale ivory paper with a pale sage-green background and natural window shadows. Square composition, object centered with generous breathing room, premium consumer retail still life, tactile materials and realistic proportions, warm soft directional daylight and realistic contact shadows. Editorial natural photography, consistent ivory, charcoal and muted earthy palette. No logos, no readable text, no prices, no watermarks, no UI. Fictional equipment illustration, not a real listing photograph.",
+    "savedPath": "apps/web/public/images/light-concept.webp",
+    "mode": "built-in image_gen",
+    "use": "Illustrative concept for fictional native catalog items; not an exact product photograph."
+  },
+  {
+    "key": "pactra_storage",
+    "prompt": "Use case: product-mockup. Asset type: illustrative concept photograph for a fictional creator equipment catalog. One unbranded full-size black SD memory card, seen front and slightly above, with realistic black plastic and gold contact details, an empty orange label with no text, on pale ivory paper with warm ochre blocks behind it. Carefully preserve the standard clipped-corner SD card shape. Square composition, object centered with generous breathing room, premium consumer retail still life, tactile materials and realistic proportions, warm soft directional daylight and realistic contact shadows. Editorial natural photography, consistent ivory, charcoal and muted earthy palette. No logos, no readable text, no prices, no watermarks, no UI. Fictional equipment illustration, not a real listing photograph.",
+    "savedPath": "apps/web/public/images/storage-concept.webp",
+    "mode": "built-in image_gen",
+    "use": "Illustrative concept for fictional native catalog items; not an exact product photograph."
+  }
+]
