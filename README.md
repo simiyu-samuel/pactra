@@ -130,3 +130,5 @@ Source repository: [simiyu-samuel/pactra](https://github.com/simiyu-samuel/pactr
 Open `/seller-console` and choose a shop. Products can be saved as drafts, published, edited or archived, with up to four photos and a manufacturer source link. Existing accepted agreements preserve their original terms. Prices and stock are not inferred from manufacturer pages. [Catalog guide](docs/19-catalog-review.md) · [Render readiness and commands](docs/20-render-readiness.md).
 
 The [live negotiation window](docs/21-live-negotiation-window.md) follows real buyer/seller exchanges, preserves private pricing context, and opens as a floating desktop panel or mobile sheet.
+
+The [full-width agent hero](docs/22-agent-hero.md) uses original desktop/mobile artwork to show buyer and seller agents negotiating a product, with illustrative prices and delivery/warranty terms.

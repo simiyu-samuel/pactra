@@ -1,6 +1,12 @@
 # Implementation status
 
-Updated October 19, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
+Updated October 20, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
+
+## Agent negotiation hero — October 20
+
+The homepage now uses a full-width generated background showing two humanoid buyer/seller agents negotiating over headphones. Illustrated $79/$88 offers include delivery and warranty terms. The headline and buyer/seller actions remain readable HTML; a portrait image serves phones and a tablet layout preserves both agents. The artwork is explicitly identified as an illustration. Catalog pricing, stock, publication status and payment behavior are unchanged. See [the hero guide](22-agent-hero.md) for assets and complete prompts.
+
+Desktop, 820px tablet and 390px mobile browser reviews found no document horizontal overflow and confirmed readable copy, visible agents/product/terms and responsive source selection. Production HTTP checks returned 200 for the storefront, negotiation, seller workspace, flights, database readiness and both WebP assets. Public bootstrap redaction passed. Strict TypeScript and the final optimized production build passed. Screenshots are saved under `assets/previews/pactra-agents-hero-*`. This presentation-only task did not call AI providers, start negotiations or initiate payments during verification; the earlier 105-test regression record belongs to the live-window task below.
 
 ## October 19 marketplace expansion
 
