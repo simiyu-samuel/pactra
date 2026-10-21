@@ -2,6 +2,12 @@
 
 Updated October 21, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
 
+## Card-free deployment preparation — October 21
+
+The owner confirmed USD 50 Render credit through October 1, 2027. Render still required a card for paid Blueprint instances; the owner explicitly chose card-free deployment. The current Blueprint uses a free web service containing supervised Next.js/worker child processes plus free PostgreSQL. Sleep pauses both processes; database-backed jobs remain durable. The free database’s 30-day expiry and workspace limits remain material demo constraints.
+
+The owner approved private API credentials and catalog-only transfer to Render. An ignored snapshot contains three shops, six products and eighteen listings (twelve published, six drafts). The guarded importer refuses nonempty targets, excludes sessions/payments and recognizes repeat startup without overwriting seller edits. All 125 regression tests, strict TypeScript and official local Blueprint schema validation pass. Hosted provisioning and checks are tracked in [document 26](26-render-deployment.md).
+
 ## Seller workspace, refund and deployment review — October 21
 
 The seller workspace now has a desktop sidebar, current-shop selector and separate Overview, Products, Agent rules, Orders & payments and Activity views. Catalog management adds a compact product list, photo-grid option, name/brand/category search, publication/stock filters, sorting and pagination. Product editing groups photos/details and price/stock controls, keeps saving visible and protects unsaved changes. The shared header collapses on tablets/phones; the smallest phone comparison action fits beside the logo and menu. Existing seller APIs, private pricing, confirmation/version checks and catalog data are preserved.

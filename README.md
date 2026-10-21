@@ -138,3 +138,5 @@ The [speed and payment journey guide](docs/23-speed-and-payment-journey.md) cove
 [Verified sandbox payment evidence](docs/24-sandbox-payment-evidence.md) records a completed buyer-approved PayPal capture and genuine signed webhook processing.
 
 [Seller workspace and release review](docs/25-seller-workspace-review.md) covers the sidebar, responsive catalog management, completed sandbox refund and proposed Render Blueprint.
+
+[Card-free Render deployment](docs/26-render-deployment.md) documents the free web/worker process pair, PostgreSQL lifetime, private catalog bootstrap and hosted verification status.

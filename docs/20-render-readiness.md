@@ -1,5 +1,7 @@
 # Render readiness — October 21, 2026
 
+**Current decision:** use the card-free Blueprint in `render.yaml`; see [document 26](26-render-deployment.md). Render confirmed USD 50 credit but still required a card for paid instances, so the owner chose free web + free PostgreSQL with a supervised in-service worker. Paid-plan discussion below is historical planning and is not the current deployment instruction.
+
 The application and catalog-management build are ready for staging preparation. No Render resources have been created and no deployment has been triggered. The owner has confirmed and published six Pixel Port listings. Local sandbox capture and signed webhook processing have been demonstrated; see document 24. The user-approved full USD 140.00 sandbox refund and its signed notification are also verified (document 25). Remaining work includes Render setup, hosted webhook verification, staging smoke checks and submission materials.
 
 ## Required before release

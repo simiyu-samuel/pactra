@@ -1,22 +1,20 @@
-# Sponsor-credit staging proposal. Paid plans consume credits.
-# Apply only after the hackathon credit balance and expiry are confirmed.
-# No out-of-pocket infrastructure spending has been authorized.
-# Add the deployed PAYPAL_WEBHOOK_ID after registering the new HTTPS endpoint.
-# Discovery addons are optional: configure their keys on pactra-web when enabled.
+# Card-free hackathon deployment. One free instance runs web + worker.
+# Render may sleep/restart this instance; jobs resume from PostgreSQL.
+# The free database expires after 30 days. Export data before expiry.
+# Add hosted PAYPAL_WEBHOOK_ID and optional discovery keys after provisioning.
 previews:
   generation: 'off'
 services:
 - type: web
   name: pactra-web
   runtime: node
-  plan: 0.5c-512mb
+  plan: free
   region: frankfurt
   branch: main
   autoDeployTrigger: 'off'
   buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false &&
     pnpm db:generate && pnpm build
-  preDeployCommand: pnpm db:migrate
-  startCommand: pnpm --filter @pactra/web start
+  startCommand: pnpm db:migrate && node --import tsx scripts/bootstrap-staging.ts && node scripts/start-free-service.mjs
   healthCheckPath: /api/health
   envVars:
   - fromGroup: pactra-runtime
@@ -33,6 +31,8 @@ services:
     generateValue: true
   - key: NEGOTIATIONS_PER_BROWSER_PER_DAY
     value: '3'
+  - key: PACTRA_CATALOG_JSON
+    sync: false
   - key: GROQ_API_KEY
     sync: false
   - key: PAYPAL_CLIENT_ID
@@ -41,49 +41,16 @@ services:
     sync: false
   - key: PAYPAL_EXPECTED_MERCHANT_ID
     sync: false
-- type: worker
-  name: pactra-worker
-  runtime: node
-  plan: 0.5c-512mb
-  region: frankfurt
-  branch: main
-  autoDeployTrigger: 'off'
-  buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false &&
-    pnpm db:generate
-  startCommand: pnpm --filter @pactra/worker start
-  envVars:
-  - fromGroup: pactra-runtime
-  - key: DATABASE_URL
-    fromDatabase:
-      name: pactra-db
-      property: connectionString
-  - key: GROQ_API_KEY
-    fromService:
-      type: web
-      name: pactra-web
-      envVarKey: GROQ_API_KEY
-  - key: PAYPAL_CLIENT_ID
-    fromService:
-      type: web
-      name: pactra-web
-      envVarKey: PAYPAL_CLIENT_ID
-  - key: PAYPAL_CLIENT_SECRET
-    fromService:
-      type: web
-      name: pactra-web
-      envVarKey: PAYPAL_CLIENT_SECRET
-  - key: PAYPAL_EXPECTED_MERCHANT_ID
-    fromService:
-      type: web
-      name: pactra-web
-      envVarKey: PAYPAL_EXPECTED_MERCHANT_ID
+  - key: CHANNEL3_API_KEY
+    sync: false
+  - key: DUFFEL_ACCESS_TOKEN
+    sync: false
 databases:
 - name: pactra-db
-  plan: 0.1c-256mb
+  plan: free
   region: frankfurt
   databaseName: pactra
   user: pactra
-  diskSizeGB: 1
   ipAllowList: []
 envVarGroups:
 - name: pactra-runtime
