@@ -2,6 +2,14 @@
 
 Updated October 21, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
 
+## Hosted free Render deployment — October 21
+
+Pactra is live at https://pactra-web.onrender.com on free Node compute plus free PostgreSQL 18 in Frankfurt. The database has public access blocked and expires November 20, 2026. Render’s optimized production build passed; startup applied migrations/imported the owner-approved catalog, and repeat startup preserved it. Both web and worker share the free instance, so idle sleep pauses processing.
+
+The hosted catalog contains three shops, six exact products, twelve published seller listings and six private drafts. Main routes/readiness return 200, public private-field redaction passed, unauthenticated owner access returns 401, forged origins return 403 and unsigned webhooks return 400. All configured provider flags are present; no live discovery/flight calls were made in this deployment review.
+
+A real hosted Groq negotiation completed: Pixel Port moved from USD 46 to USD 44 including five-day delivery after a buyer counteroffer, within a USD 50/seven-day brief; Studio Stack declined its final counteroffer. The hosted sandbox PayPal webhook is registered with its correct environment ID, and the environment restart is Live. Buyer approval/capture and genuine signed hosted notification processing still require a new human-completed sandbox purchase. See [document 26](26-render-deployment.md) for exact evidence and constraints.
+
 ## Card-free deployment preparation — October 21
 
 The owner confirmed USD 50 Render credit through October 1, 2027. Render still required a card for paid Blueprint instances; the owner explicitly chose card-free deployment. The current Blueprint uses a free web service containing supervised Next.js/worker child processes plus free PostgreSQL. Sleep pauses both processes; database-backed jobs remain durable. The free database’s 30-day expiry and workspace limits remain material demo constraints.
