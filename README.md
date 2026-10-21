@@ -134,3 +134,5 @@ The [live negotiation window](docs/21-live-negotiation-window.md) follows real b
 The [full-width agent hero](docs/22-agent-hero.md) uses original desktop/mobile artwork to show buyer and seller agents negotiating a product, with illustrative prices and delivery/warranty terms.
 
 The [speed and payment journey guide](docs/23-speed-and-payment-journey.md) covers short seller-eligible negotiations, buyer agreement history, seller orders/payments, explicit full-refund approval, the focused order assistant and local ngrok webhook testing.
+
+[Verified sandbox payment evidence](docs/24-sandbox-payment-evidence.md) records a completed buyer-approved PayPal capture and genuine signed webhook processing.

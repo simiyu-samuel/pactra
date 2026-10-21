@@ -6,8 +6,13 @@ import { reconcileCheckout } from './checkout';
 const schema = z.object({ id: z.string().min(1).max(120), event_type: z.string().min(1).max(120), resource: z.record(z.string(), z.unknown()) }).passthrough();
 const supported = new Set(['CHECKOUT.ORDER.APPROVED', 'CHECKOUT.PAYMENT-APPROVAL.REVERSED', 'PAYMENT.CAPTURE.COMPLETED', 'PAYMENT.CAPTURE.PENDING', 'PAYMENT.CAPTURE.DECLINED', 'PAYMENT.CAPTURE.REFUNDED', 'PAYMENT.CAPTURE.REVERSED']);
 export async function receivePayPalWebhook(headers: Headers, raw: unknown) {
-  const payload = schema.parse(raw);
-  await verifyWebhook(headers, payload);
+  let original = raw;
+  if (typeof raw === 'string') {
+    try { original = JSON.parse(raw); } catch { throw new RuleError('INVALID_JSON', 'Invalid webhook JSON.', 400); }
+  }
+  const payload = schema.parse(original);
+  // Validation can rebuild/reorder objects: verify the unmodified signed input.
+  await verifyWebhook(headers, raw);
   // Acknowledge only after verified durable intake. A duplicate never overwrites its first body.
   await db.paymentEvent.upsert({ where: { id: payload.id }, create: { id: payload.id, type: payload.event_type, body: json(payload), verified: true }, update: {} });
 }

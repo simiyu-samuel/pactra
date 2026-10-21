@@ -1,6 +1,14 @@
 # Implementation status
 
-Updated October 20, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
+Updated October 21, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
+
+## Sandbox capture and signed webhooks — October 21
+
+The user completed an actual PayPal sandbox purchase of one Bellroy Classic Backpack from Pixel Port. Accepted/captured total USD 140.00 matches the recorded agreement; the asking total with the same delivery was USD 147.00. Fresh PayPal order retrieval verified the completed order/capture, configured merchant, amount, currency and agreement linkage. Buyer and seller projections agree, one reservation was consumed, and one payment-completed event was recorded.
+
+Live notification delivery exposed a JSON-ordering fault: validation rebuilt PayPal's signed event before postback verification. The receiver now preserves the exact original request text for verification while validating the parsed payload separately. The genuine original passed PayPal verification while the reordered object failed. The actual approval and completed-capture notifications were recovered from ngrok, verified, durably stored and processed once without errors. No new charge, refund or stock adjustment was initiated during verification. See [the payment evidence](24-sandbox-payment-evidence.md).
+
+All 120 regression tests, strict TypeScript and the final optimized production build passed, including exact signed-byte preservation and malformed-JSON rejection. Two HTTP replays of the authentic capture notification through ngrok returned 200; the inbox, payment completion and consumed reservation remained unique. Live refund completion and hosted deployment/webhook checks remain outstanding; earlier statements about missing capture and local signed-notification evidence are superseded by this record.
 
 ## Faster negotiations and order payments — October 20
 

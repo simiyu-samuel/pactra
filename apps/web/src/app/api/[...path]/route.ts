@@ -33,11 +33,15 @@ function csrf(req: NextRequest) {
   const allowed = process.env.PUBLIC_APP_URL || req.nextUrl.origin;
   if (req.headers.get('origin') !== allowed) throw new RuleError('ORIGIN_REJECTED', 'The request origin was not accepted.', 403);
 }
-async function body(req: NextRequest) {
+async function rawBody(req: NextRequest) {
   if (Number(req.headers.get('content-length') || 0) > 50_000) throw new RuleError('BODY_TOO_LARGE', 'Request is too large.', 413);
   const text = await req.text();
   if (text.length > 50_000) throw new RuleError('BODY_TOO_LARGE', 'Request is too large.', 413);
-  try { return JSON.parse(text || '{}'); } catch { throw new RuleError('INVALID_JSON', 'Invalid request body.', 400); }
+  return text || '{}';
+}
+async function body(req: NextRequest) {
+  const text = await rawBody(req);
+  try { return JSON.parse(text); } catch { throw new RuleError('INVALID_JSON', 'Invalid request body.', 400); }
 }
 const ok = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
 
@@ -61,7 +65,7 @@ async function dispatch(req: NextRequest, path: string[]) {
   }
   if (req.method === 'GET' && resource === 'flights' && id === 'config' && !action) return ok({ configured: duffelConfigured(), mode: 'test' });
   if (req.method === 'POST' && resource === 'webhooks' && id === 'paypal') {
-    await receivePayPalWebhook(req.headers, await body(req));
+    await receivePayPalWebhook(req.headers, await rawBody(req));
     return ok({ received: true });
   }
   if (req.method === 'POST') csrf(req);

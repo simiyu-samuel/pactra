@@ -126,3 +126,7 @@ Order retrieval is authoritative for approval/capture reconciliation. Completed 
 Before expiring an approval with a remote order ID, the worker retrieves its current state. Pending or unavailable payment evidence retains the hold; a confirmed completion consumes it once. The original create/capture request keys survive uncertain responses. The current implementation uses the checkout's durable keys, state and operation timestamp rather than a separate operation table.
 
 Verification: 85 backend tests passed, with real PostgreSQL and stubbed provider responses, including nineteen recovery tests and five additional capture-evidence cases. Actual sandbox buyer approval/capture and external HTTPS signature delivery remain separate release gates. The owner console does not yet offer payment-case resolution or dead-inbox retry controls; inspect and resolve these cases against PayPal evidence before deliberately requeuing an identified event.
+
+## October 21 live verification
+
+[Document 24](24-sandbox-payment-evidence.md) records the user-approved USD 140.00 sandbox capture and genuine signed approval/capture notifications. A live-only JSON ordering fault was fixed by preserving the original request text through postback verification. Earlier notes that actual capture and local signed delivery were unverified are superseded by that evidence. Hosted delivery and live refund completion remain separate checks.

@@ -179,3 +179,20 @@ it('rejects a webhook whose order mapping conflicts with its known capture', asy
   expect(await db.paymentEvent.findUnique({ where: { id: payload.id } })).toMatchObject({ processed: false, errorCode: 'PAYMENT_LINK_MISMATCH' });
   expect(await db.checkout.findUnique({ where: { id: checkout.id } })).toMatchObject({ state: 'paid' });
 });
+
+it('preserves the signed event bytes and PayPal field order through postback verification', async () => {
+  const event = notification();
+  const paypalOrdered = { id: event.id, event_version: '1.0', create_time: '2026-10-21T05:38:00Z', resource_type: 'capture', event_type: event.event_type, summary: 'Sandbox café fixture', resource: event.resource };
+  const original = JSON.stringify(paypalOrdered, null, 2) + '\n';
+  await receivePayPalWebhook(headers, original);
+  const call = fetcher.mock.calls.find(([url]) => String(url).endsWith('/verify-webhook-signature'));
+  expect(call).toBeDefined();
+  const body = String((call![1] as RequestInit).body);
+  expect(body.endsWith(`"webhook_event":${original}}`)).toBe(true);
+  expect(JSON.parse(body).webhook_event).toEqual(paypalOrdered);
+  expect(await db.paymentEvent.findUnique({where:{id:event.id}})).toMatchObject({verified:true,processed:false});
+});
+it('rejects malformed webhook text before provider verification or durable intake', async () => {
+  await expect(receivePayPalWebhook(headers, '{invalid-json')).rejects.toMatchObject({code:'INVALID_JSON'});
+  expect(fetcher).not.toHaveBeenCalled();
+});

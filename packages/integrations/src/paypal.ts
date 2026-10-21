@@ -20,9 +20,9 @@ async function token() {
 /** Authenticate against sandbox without creating or capturing a payment. */
 export async function verifyPayPalConnection() { await token(); }
 
-async function request<T>(path: string, method = 'GET', body?: unknown, key?: string): Promise<T> {
+async function request<T>(path: string, method = 'GET', body?: unknown, key?: string, serializedBody?: string): Promise<T> {
   const access = await token();
-  const response = await fetch(`${base}${path}`, { method, headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json', ...(key ? { 'PayPal-Request-Id': key } : {}) }, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(20_000) });
+  const response = await fetch(`${base}${path}`, { method, headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json', ...(key ? { 'PayPal-Request-Id': key } : {}) }, body: serializedBody ?? (body === undefined ? undefined : JSON.stringify(body)), signal: AbortSignal.timeout(20_000) });
   if (!response.ok) throw new RuleError('PAYPAL_REQUEST_FAILED', 'PayPal could not confirm the operation. Payment status will be checked before retrying.', 502);
   return response.json() as Promise<T>;
 }
@@ -59,9 +59,13 @@ export async function verifyWebhook(headers: Headers, body: unknown) {
   if (!process.env.PAYPAL_WEBHOOK_ID) throw new RuleError('WEBHOOK_NOT_CONFIGURED', 'PayPal webhook verification is not configured.', 503);
   const names = ['auth-algo', 'cert-url', 'transmission-id', 'transmission-sig', 'transmission-time'];
   if (names.some(name => !headers.get(`paypal-${name}`))) throw new RuleError('INVALID_WEBHOOK', 'Required PayPal verification headers are missing.', 400);
-  const result = await request<{ verification_status: string }>('/v1/notifications/verify-webhook-signature', 'POST', {
-    auth_algo: headers.get('paypal-auth-algo'), cert_url: headers.get('paypal-cert-url'), transmission_id: headers.get('paypal-transmission-id'), transmission_sig: headers.get('paypal-transmission-sig'), transmission_time: headers.get('paypal-transmission-time'), webhook_id: process.env.PAYPAL_WEBHOOK_ID, webhook_event: body,
-  });
+  const proof = {
+    auth_algo: headers.get('paypal-auth-algo'), cert_url: headers.get('paypal-cert-url'), transmission_id: headers.get('paypal-transmission-id'), transmission_sig: headers.get('paypal-transmission-sig'), transmission_time: headers.get('paypal-transmission-time'), webhook_id: process.env.PAYPAL_WEBHOOK_ID,
+  };
+  // Keep the signed event's original field order, whitespace and encoding.
+  const rawEvent = typeof body === 'string' ? body : JSON.stringify(body);
+  const serialized = `${JSON.stringify(proof).slice(0, -1)},"webhook_event":${rawEvent}}`;
+  const result = await request<{ verification_status: string }>('/v1/notifications/verify-webhook-signature', 'POST', undefined, undefined, serialized);
   if (result.verification_status !== 'SUCCESS') throw new RuleError('INVALID_WEBHOOK', 'PayPal signature verification failed.', 400);
 }
 
