@@ -1,6 +1,6 @@
 # Render readiness — October 21, 2026
 
-The application and catalog-management build are ready for staging preparation. No Render resources have been created and no deployment has been triggered. The owner has confirmed and published six Pixel Port listings. Local sandbox capture and signed webhook processing have been demonstrated; see document 24. Remaining work includes live refund testing, Render setup, hosted webhook verification, staging smoke checks and submission materials.
+The application and catalog-management build are ready for staging preparation. No Render resources have been created and no deployment has been triggered. The owner has confirmed and published six Pixel Port listings. Local sandbox capture and signed webhook processing have been demonstrated; see document 24. The user-approved full USD 140.00 sandbox refund and its signed notification are also verified (document 25). Remaining work includes Render setup, hosted webhook verification, staging smoke checks and submission materials.
 
 ## Required before release
 
@@ -28,7 +28,7 @@ Keep the service root at the repository root so workspace packages resolve. Use 
 | Web readiness path | `/api/health` |
 | One-time catalog bootstrap after migration | `pnpm db:seed && pnpm catalog:prepare` |
 
-The web start command binds `0.0.0.0` and Render’s `PORT`. Run migrations once through the web deployment before starting the matching worker version; the current change is additive. Keep initial deploys manual until the staged smoke test passes. No `render.yaml` has been submitted or validated against a Render account. Render supports pre-deploy commands on paid web/private/worker services; if choosing a plan without one, run migrations in a controlled release step before startup. Choose and review actual compute/database costs in Render before creating resources.
+The web start command binds `0.0.0.0` and Render’s `PORT`. Run migrations once through the web deployment before starting the matching worker version; the current change is additive. Keep initial deploys manual until the staged smoke test passes. The proposed root `render.yaml` passes local validation against Render’s official JSON Schema; it has not been applied or validated against a Render account. Render supports pre-deploy commands on paid web/private/worker services; if choosing a plan without one, run migrations in a controlled release step before startup. Choose and review actual compute/database costs in Render before creating resources.
 
 The initializer preserves existing catalog edits, archives samples and creates review drafts; it never publishes. Provisioning a fresh database does not copy the local owner’s prices/stock or active agreements. Review and publish in the deployed owner workspace or arrange an explicit catalog/data transfer separately. Do not rerun a destructive database reset for deployment.
 
@@ -45,3 +45,27 @@ Check all main pages, DB readiness, icons and remote photos. Verify unauthentica
 ## Official Render references
 
 Checked October 20, 2026: [Next.js web services](https://render.com/docs/deploy-nextjs-app), [background workers](https://render.com/docs/background-workers), [deploy and pre-deploy steps](https://render.com/docs/deploys), [Blueprint specification](https://render.com/docs/blueprint-spec). Commands above are derived for this repository and have not yet been executed on Render.
+
+
+## Proposed Blueprint for review
+
+The root [render.yaml](../render.yaml) proposes Frankfurt services: a `0.5c-512mb` web service, a `0.5c-512mb` worker and `0.1c-256mb` PostgreSQL with 1 GB storage. Automatic deploys and previews are off. The database blocks external connections; web/worker use its private connection string. Web migrations run before web startup. The worker’s existing retry loop waits for database/schema availability during first provisioning; confirm migration completion before admitting demo traffic.
+
+The October 21 published baseline is USD 7/month web + USD 7/month worker + USD 6/month database compute (USD 20/month before storage, workspace charges, bandwidth, taxes and any other usage). This is a planning estimate, not an account quote or a spending authorization. Confirm the dashboard total and any hackathon credits before creating resources. References: [Render pricing](https://render.com/pricing) and [Render’s representative baseline](https://render.com/articles/production-rails-hosting-guide).
+
+Creation prompts for Groq and PayPal sandbox credentials. The worker references the same values from the web service. A new owner access code is generated on Render; retrieve it privately from the web service environment. `PUBLIC_APP_URL` references Render’s own `RENDER_EXTERNAL_URL`, preserving the exact-origin check without guessing a hostname. Override it explicitly if a custom domain becomes canonical.
+
+After the actual URL exists, register its `/api/webhooks/paypal` endpoint and add the resulting `PAYPAL_WEBHOOK_ID` to the web service. Do not reuse the ngrok ID. Configure optional `CHANNEL3_API_KEY`, `DUFFEL_ACCESS_TOKEN` and addon limits on the web service if enabling discovery. These credentials are intentionally absent from the repository. No local orders, sessions or private seller rules are copied by this Blueprint.
+
+For a fresh staging catalog, seed/prepare only in that new database and review its private drafts, or arrange a deliberate transfer of owner-approved catalog data. Do not copy a whole local database containing sessions/payment records or reset the existing catalog. Keep the empty storefront private until approved listings and all provider checks are ready. Review full compute plans and region before applying; an initial 512 MB runtime is a small-demo starting point and must be monitored for memory pressure.
+
+
+## Sponsor credits and zero-cash preference
+
+The owner requires free resources or confirmed sponsor credits; no out-of-pocket infrastructure spending is approved. The [official hackathon Render page](https://paypalaihackathon.devpost.com/details/render) advertises **USD 50 in building credits** and links to the [claim portal](https://credits-portal-mmdm.onrender.com/claim/paypal-ai-hackathon). These are separate from the Render winner prizes. The portal redirected browser inspection to GitHub sign-in, which automatic approval review blocked as separate account access. The owner must complete that claim; no code was claimed or applied during this review.
+
+Select the intended Render workspace, open Billing, and redeem the promo code in Credit Balance following [Render’s redemption guide](https://render.com/docs/credits). Verify the balance, eligibility, expiry and any payment-method requirement in the account before applying the Blueprint. The public guide says expiry depends on the promotion; this review could not establish an event-specific expiry. Credits offset eligible bills at the end of the billing period, and excess usage can charge a payment method. Keep resource and total workspace usage below the confirmed remaining credit and remove/suspend resources before coverage ends. A USD 50 balance would cover approximately 2.5 months of the USD 20/month compute baseline alone; storage/other usage and expiry reduce that window.
+
+The default recommendation is the existing architecture funded by confirmed hackathon credits. Render’s [free-tier documentation](https://render.com/docs/free) offers free web services and one free 1 GB PostgreSQL database, but no free background worker. A free web service sleeps after 15 minutes without traffic and can take about a minute to wake; its free PostgreSQL expires after 30 days and has no backups. A strictly free deployment therefore needs a deliberate worker-execution change or another free worker host, plus a database longevity plan. Do not silently omit the worker or introduce keep-alive pings: negotiation and payment recovery depend on durable job processing.
+
+The Blueprint remains an unapplied, credit-gated proposal. It is not a claim that its compute plans are free. If sponsor credits cannot be redeemed, choose and implement the free architecture before deployment.

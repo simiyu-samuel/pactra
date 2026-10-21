@@ -111,7 +111,7 @@ export default function Marketplace() {
   const externalLink = fallbackLink(source, appliedQuery || query);
   const sourceHelp = source === 'pactra' ? 'These are seller asking prices. Your agents negotiate the full price, including delivery.' : source === 'channel3' ? 'Retailer offers supplied by Channel3 for its default US market. Shipping, taxes and destination availability must be confirmed at the store.' : 'AI web discoveries link to the original marketplace. Search pages may appear alongside listings. Price, stock and delivery are confirmed there.';
   return <div className={s.market}>
-    <SiteHeader active="shop" action={<button className={s.compareTop} onClick={() => setComparing(true)} disabled={selected.length < 2}><Layers3 size={17}/><span>Compare finds</span><b>{selected.length}</b></button>}/>
+    <SiteHeader active="shop" action={<button className={s.compareTop} onClick={() => setComparing(true)} disabled={selected.length < 2}><Layers3 size={17}/><span>Compare</span><b>{selected.length}</b></button>}/>
     <main>
       <MarketplaceHero/>
       <div className={s.main}>

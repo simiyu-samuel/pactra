@@ -136,3 +136,5 @@ The [full-width agent hero](docs/22-agent-hero.md) uses original desktop/mobile 
 The [speed and payment journey guide](docs/23-speed-and-payment-journey.md) covers short seller-eligible negotiations, buyer agreement history, seller orders/payments, explicit full-refund approval, the focused order assistant and local ngrok webhook testing.
 
 [Verified sandbox payment evidence](docs/24-sandbox-payment-evidence.md) records a completed buyer-approved PayPal capture and genuine signed webhook processing.
+
+[Seller workspace and release review](docs/25-seller-workspace-review.md) covers the sidebar, responsive catalog management, completed sandbox refund and proposed Render Blueprint.

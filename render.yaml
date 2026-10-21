@@ -1,0 +1,106 @@
+# Sponsor-credit staging proposal. Paid plans consume credits.
+# Apply only after the hackathon credit balance and expiry are confirmed.
+# No out-of-pocket infrastructure spending has been authorized.
+# Add the deployed PAYPAL_WEBHOOK_ID after registering the new HTTPS endpoint.
+# Discovery addons are optional: configure their keys on pactra-web when enabled.
+previews:
+  generation: 'off'
+services:
+- type: web
+  name: pactra-web
+  runtime: node
+  plan: 0.5c-512mb
+  region: frankfurt
+  branch: main
+  autoDeployTrigger: 'off'
+  buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false &&
+    pnpm db:generate && pnpm build
+  preDeployCommand: pnpm db:migrate
+  startCommand: pnpm --filter @pactra/web start
+  healthCheckPath: /api/health
+  envVars:
+  - fromGroup: pactra-runtime
+  - key: DATABASE_URL
+    fromDatabase:
+      name: pactra-db
+      property: connectionString
+  - key: PUBLIC_APP_URL
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: RENDER_EXTERNAL_URL
+  - key: OWNER_LOGIN_SECRET
+    generateValue: true
+  - key: NEGOTIATIONS_PER_BROWSER_PER_DAY
+    value: '3'
+  - key: GROQ_API_KEY
+    sync: false
+  - key: PAYPAL_CLIENT_ID
+    sync: false
+  - key: PAYPAL_CLIENT_SECRET
+    sync: false
+  - key: PAYPAL_EXPECTED_MERCHANT_ID
+    sync: false
+- type: worker
+  name: pactra-worker
+  runtime: node
+  plan: 0.5c-512mb
+  region: frankfurt
+  branch: main
+  autoDeployTrigger: 'off'
+  buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false &&
+    pnpm db:generate
+  startCommand: pnpm --filter @pactra/worker start
+  envVars:
+  - fromGroup: pactra-runtime
+  - key: DATABASE_URL
+    fromDatabase:
+      name: pactra-db
+      property: connectionString
+  - key: GROQ_API_KEY
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: GROQ_API_KEY
+  - key: PAYPAL_CLIENT_ID
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: PAYPAL_CLIENT_ID
+  - key: PAYPAL_CLIENT_SECRET
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: PAYPAL_CLIENT_SECRET
+  - key: PAYPAL_EXPECTED_MERCHANT_ID
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: PAYPAL_EXPECTED_MERCHANT_ID
+databases:
+- name: pactra-db
+  plan: 0.1c-256mb
+  region: frankfurt
+  databaseName: pactra
+  user: pactra
+  diskSizeGB: 1
+  ipAllowList: []
+envVarGroups:
+- name: pactra-runtime
+  envVars:
+  - key: NODE_VERSION
+    value: '22'
+  - key: NODE_ENV
+    value: production
+  - key: GROQ_MODEL
+    value: openai/gpt-oss-20b
+  - key: GROQ_TOKENS_PER_MINUTE
+    value: '6800'
+  - key: GROQ_TOKENS_PER_DAY
+    value: '170000'
+  - key: GROQ_REQUESTS_PER_MINUTE
+    value: '25'
+  - key: GROQ_REQUESTS_PER_DAY
+    value: '850'
+  - key: PAYPAL_ENV
+    value: sandbox

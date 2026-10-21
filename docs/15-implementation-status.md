@@ -2,6 +2,16 @@
 
 Updated October 21, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
 
+## Seller workspace, refund and deployment review — October 21
+
+The seller workspace now has a desktop sidebar, current-shop selector and separate Overview, Products, Agent rules, Orders & payments and Activity views. Catalog management adds a compact product list, photo-grid option, name/brand/category search, publication/stock filters, sorting and pagination. Product editing groups photos/details and price/stock controls, keeps saving visible and protects unsaved changes. The shared header collapses on tablets/phones; the smallest phone comparison action fits beside the logo and menu. Existing seller APIs, private pricing, confirmation/version checks and catalog data are preserved.
+
+Fresh PayPal retrieval confirmed the user-approved USD 140.00 full refund as completed and linked to the original capture. Its signed refund notification processed without an error; there is one refund-completed event and consumed inventory remains unchanged. Earlier statements that live sandbox refunds were unverified are superseded by [document 25](25-seller-workspace-review.md).
+
+All 120 regression tests, strict TypeScript and the final optimized build passed. Desktop/tablet/phone browser checks, product/editor navigation and unsaved-change guards passed without document horizontal overflow in reviewed views. Production pages/readiness, public redaction, private owner access, forged-origin rejection and unsigned-webhook rejection passed. The approved local restart serves the new release at port 3100. No catalog edits or new financial/AI operations were made during this review.
+
+The proposed Render Blueprint passes local official JSON Schema validation; no hosted resources are created. The owner requires free resources or confirmed sponsor credits. The official hackathon Render page advertises USD 50 building credits, separate from winner prizes. Claiming requires the owner to complete the portal sign-in and confirm the balance/expiry before the credit-funded proposal is applied. Automatic approval review blocked the portal’s GitHub sign-in redirect. See [deployment readiness](20-render-readiness.md) for the credit steps, free-tier limitations and pending hosted checks.
+
 ## Sandbox capture and signed webhooks — October 21
 
 The user completed an actual PayPal sandbox purchase of one Bellroy Classic Backpack from Pixel Port. Accepted/captured total USD 140.00 matches the recorded agreement; the asking total with the same delivery was USD 147.00. Fresh PayPal order retrieval verified the completed order/capture, configured merchant, amount, currency and agreement linkage. Buyer and seller projections agree, one reservation was consumed, and one payment-completed event was recorded.
