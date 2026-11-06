@@ -1,20 +1,22 @@
-# Card-free hackathon deployment. One free instance runs web + worker.
-# Render may sleep/restart this instance; jobs resume from PostgreSQL.
-# The free database expires after 30 days. Export data before expiry.
-# Add hosted PAYPAL_WEBHOOK_ID and optional discovery keys after provisioning.
+# Always-on hackathon deployment, prepared November 6, 2026.
+# Compute + 1 GB database storage: USD 20.30/month at the reviewed prices.
+# Existing USD 50 hackathon credit is applied to eligible monthly invoices.
+# Credit is not a hard spending cap. Review billing before it is exhausted.
+# Recurring cost approved November 6, 2026; use the existing Pactra Blueprint.
 previews:
   generation: 'off'
 services:
 - type: web
   name: pactra-web
   runtime: node
-  plan: free
+  plan: 0.5c-512mb
   region: frankfurt
   branch: main
   autoDeployTrigger: 'off'
   buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false &&
     pnpm db:generate && pnpm build
-  startCommand: pnpm db:migrate && node --import tsx scripts/bootstrap-staging.ts && node scripts/start-free-service.mjs
+  preDeployCommand: pnpm db:migrate && node --import tsx scripts/bootstrap-staging.ts
+  startCommand: pnpm --filter @pactra/web start
   healthCheckPath: /api/health
   envVars:
   - fromGroup: pactra-runtime
@@ -41,16 +43,55 @@ services:
     sync: false
   - key: PAYPAL_EXPECTED_MERCHANT_ID
     sync: false
+  - key: PAYPAL_WEBHOOK_ID
+    sync: false
   - key: CHANNEL3_API_KEY
     sync: false
   - key: DUFFEL_ACCESS_TOKEN
     sync: false
+- type: worker
+  name: pactra-worker
+  runtime: node
+  plan: 0.5c-512mb
+  region: frankfurt
+  branch: main
+  autoDeployTrigger: 'off'
+  buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false &&
+    pnpm db:generate
+  startCommand: pnpm --filter @pactra/worker start
+  envVars:
+  - fromGroup: pactra-runtime
+  - key: DATABASE_URL
+    fromDatabase:
+      name: pactra-db
+      property: connectionString
+  - key: GROQ_API_KEY
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: GROQ_API_KEY
+  - key: PAYPAL_CLIENT_ID
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: PAYPAL_CLIENT_ID
+  - key: PAYPAL_CLIENT_SECRET
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: PAYPAL_CLIENT_SECRET
+  - key: PAYPAL_EXPECTED_MERCHANT_ID
+    fromService:
+      type: web
+      name: pactra-web
+      envVarKey: PAYPAL_EXPECTED_MERCHANT_ID
 databases:
 - name: pactra-db
-  plan: free
+  plan: 0.1c-256mb
   region: frankfurt
   databaseName: pactra
   user: pactra
+  diskSizeGB: 1
   ipAllowList: []
 envVarGroups:
 - name: pactra-runtime
