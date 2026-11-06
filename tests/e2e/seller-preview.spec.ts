@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const catalog = { sellers: [{ name: 'Pixel Port', standardCents: 800, standardDays: 5, expressCents: 1500, expressDays: 2, warrantyMonths: 12, listings: [{ listCents: 4000, product: { name: 'Coffee maker', brand: 'A brand', role: 'home', description: 'A simple coffee maker for everyday use.', images: ['https://example.com/coffee.jpg'] } }] }] };
+const catalog = { sellers: [{ id: 'public-shop', name: 'Pixel Port', standardCents: 800, standardDays: 5, expressCents: 1500, expressDays: 2, warrantyMonths: 12, listings: [{ id: 'public-listing', listCents: 4000, available: 10, product: { id: 'public-product', name: 'Coffee maker', brand: 'A brand', role: 'home', description: 'A simple coffee maker for everyday use.', images: ['https://example.com/coffee.jpg'] } }] }] };
 
 test('judges can explore and save practice edits without an owner session or writes', async ({ page }) => {
   test.setTimeout(90_000);

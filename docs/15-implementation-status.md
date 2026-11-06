@@ -4,7 +4,7 @@ Updated November 6, 2026. The other documents describe the intended hackathon re
 
 ## Judge seller entry — November 6
 
-A one-click `/seller-preview` practice workspace reuses the seller console without an access code. Visible homepage/header links and the existing owner sign-in page lead into it. It copies only published public catalog details and uses example minimums, stock and instructions. Product/rule edits and activity stay in a per-page memory store and reset on refresh. It cannot read private orders or call owner/refund APIs. Actual seller administration stays protected at `/seller-console`. See [judge access](28-judge-seller-access.md) for testing instructions and remaining submission work.
+A one-click `/seller-preview` practice workspace reuses the seller console without an access code. Visible homepage/header links and the existing owner sign-in page lead into it. It copies only published public catalog details and uses example minimums, stock and instructions. Product/rule edits and activity stay in a per-page memory store and reset on refresh. It cannot read private orders or call owner/refund APIs. Actual seller administration stays protected at `/seller-console`. Release `0489ea4` is live on Render; 47 local unit tests, the desktop/phone seller walkthrough, TypeScript, production build and GitHub CI passed. Hosted practice rule saving/reset and private API rejection were verified. See [judge access](28-judge-seller-access.md) for testing instructions and remaining submission work.
 
 ## Credit-funded, always-on Render deployment — November 6
 
