@@ -4,9 +4,15 @@
 
 Pactra gives buyers and sellers their own negotiating agents. Buyers select products, quantities, budget and delivery limits. Sellers set asking prices, private minimum prices, stock and delivery options. Their agents exchange offers in a live conversation window with separate seller threads and a pinned deal summary; the buyer compares the complete terms and approves the exact agreed PayPal test payment. External store search and flights are optional discovery tools.
 
-The current approved direction is [negotiation first](docs/18-negotiation-first.md). The marketplace supports any seller-listed product category. Six real branded product references with manufacturer photos are prepared as private drafts in each seller workspace. Owner review sets prices, private minimums, stock and delivery before publication. See [catalog review](docs/19-catalog-review.md).
+The current approved direction is [negotiation first](docs/18-negotiation-first.md). The marketplace supports any seller-listed product category. The live catalog holds six exact products and eighteen seller listings: twelve published listings across Pixel Port and Studio Stack, plus six Swift Gear drafts. Owners manage prices, private minimums, stock and delivery in the seller workspace. See [catalog review](docs/19-catalog-review.md).
 
-**Project status:** negotiation-first marketplace, general product requests, real-product review drafts and seller catalog management implemented; final release validation continues. The web app, database, worker, negotiation rules, and provider adapters are implemented. The protected seller policy console and immutable buyer/seller history are implemented. Live Groq negotiation and unpaid PayPal sandbox order creation are verified; buyer approval/capture, webhook delivery, and the full hackathon release remain incomplete. See [implementation status](docs/15-implementation-status.md) for verified behavior and remaining work.
+**Project status:** the negotiation-first marketplace, seller workspace, general product requests and published catalog are live on Render. A hosted Groq negotiation and a buyer-approved PayPal sandbox payment have been completed end to end, as confirmed by the project owner. PayPal remains in sandbox mode. The app now runs on credit-funded, always-on Render web and worker instances with paid PostgreSQL; the earlier free-database expiry has been removed. Remaining release work centers on the Devpost materials and recorded judging evidence. See [implementation status](docs/15-implementation-status.md) and [Render readiness](docs/20-render-readiness.md).
+
+## How AI and PayPal work
+
+- **AI negotiation:** Groq’s Chat Completions API, called with the official `groq-sdk` and `openai/gpt-oss-20b`, powers the buyer agent and independent seller agents. The agents propose structured prices and terms; application rules check stock, delivery limits and private seller floors before offers are shown. An agent cannot authorize a purchase.
+- **PayPal checkout:** The PayPal JavaScript SDK presents the approval button. The server creates and captures orders through PayPal Orders v2 using the total from the accepted agreement. PayPal webhook signatures are verified before the durable event inbox updates a receipt. The buyer must approve the exact deal. The demo uses PayPal Sandbox; the three demo shops share one sandbox merchant and do not make real seller payouts.
+- **Sponsor integrations:** Channel3 powers retailer product discovery; Render hosts the live application and PostgreSQL database. Duffel is used for test-mode flight discovery, an optional feature.
 
 ## Approved marketplace direction
 
@@ -109,6 +115,7 @@ New buyer briefs retain every confirmed revision; rooms show their brief history
 
 ## Assets
 
+- [Devpost thumbnail](assets/previews/pactra-devpost-thumbnail.png): 3:2 submission image showing Pactra’s buyer and seller agents negotiating a product.
 - [Brand direction](assets/brand/brand-direction.md): positioning, colors, typography, and visual tone.
 - [Demo data guide](assets/demo/README.md): fictional product facts, seller listings, private policies, and expected feasibility.
 - [Products](assets/demo/products.csv), [listings](assets/demo/listings.csv), and [seller policies](assets/demo/seller-policies.csv): fictional fixtures imported by `pnpm db:seed`.
@@ -119,7 +126,7 @@ New buyer briefs retain every confirmed revision; rooms show their brief history
 
 ## Continue implementation
 
-Use the [implementation status](docs/15-implementation-status.md) together with the [roadmap](docs/08-build-roadmap.md). Complete live-provider validation and the remaining acceptance criteria before calling the release hackathon-ready.
+Use the [implementation status](docs/15-implementation-status.md) together with the [roadmap](docs/08-build-roadmap.md). The core hosted buyer-to-seller negotiation and PayPal sandbox checkout have been exercised. The credit-funded Render migration is complete, including a verified backup, retained seller/payment records and a new hosted negotiation. Remaining work centers on recording hosted payment evidence and rehearsing the short judging demo.
 
 ## Repository status
 
@@ -139,4 +146,4 @@ The [speed and payment journey guide](docs/23-speed-and-payment-journey.md) cove
 
 [Seller workspace and release review](docs/25-seller-workspace-review.md) covers the sidebar, responsive catalog management, completed sandbox refund and proposed Render Blueprint.
 
-[Card-free Render deployment](docs/26-render-deployment.md) documents the free web/worker process pair, PostgreSQL lifetime, private catalog bootstrap and hosted verification status.
+[Render deployment history](docs/26-render-deployment.md) documents the original card-free deployment and private catalog bootstrap. [Credit-funded migration](docs/27-credit-funded-migration.md) records the November 6 upgrade to separate always-on web/worker services and paid PostgreSQL, with the reviewed USD 20.30/month base cost and backup/verification evidence.

@@ -1,14 +1,22 @@
 # Implementation status
 
-Updated October 21, 2026. The other documents describe the intended hackathon release; this file records what actually exists.
+Updated November 6, 2026. The other documents describe the intended hackathon release; this file records verified behavior. Dated entries below the current update preserve earlier implementation and deployment history.
 
-## Hosted free Render deployment — October 21
+## Credit-funded, always-on Render deployment — November 6
+
+The owner added a payment method and approved USD 20.30/month base infrastructure, funded first by the USD 50 hackathon credit. The existing web service and database were upgraded in place, and a separate background worker is now Live. Both compute services use `0.5c-512mb`; PostgreSQL 18 uses `0.1c-256mb` with its existing 1 GB storage. The free-database expiry notice is gone and the public URL remains https://pactra-web.onrender.com. The workspace remains Hobby; Blueprint and service deployments are manual.
+
+A full private backup was copied from Render and verified by SHA-256 and a full `pg_restore` archive read. A managed logical export is also downloadable. All pre-upgrade counts matched afterward: 3 sellers, 6 products, 18 listings, 5 shopping sessions, 4 checkouts, 4 reservations, 2 payment events and 0 refund requests. Health/bootstrap return 200; 12 published listings, provider configuration and public private-field redaction passed. The original owner access code still opens the seller workspace. The web container has no resident worker process; the dedicated worker logs readiness.
+
+A new real hosted negotiation for one AeroPress, USD 50 maximum and seven-day arrival, completed on the dedicated worker: Pixel Port offered USD 38 products + USD 8 delivery = USD 46; Studio Stack offered USD 37 + USD 10 delivery = USD 47. Published delivery rates now appear before negotiation, and live offers itemize delivery. The request form and completed room fit a 390px viewport without horizontal overflow. No new payment, stock reservation or refund was initiated. Render's production build and TypeScript passed. See [current readiness](20-render-readiness.md) and [migration evidence](27-credit-funded-migration.md).
+
+## Hosted free Render deployment — October 21 (historical)
 
 Pactra is live at https://pactra-web.onrender.com on free Node compute plus free PostgreSQL 18 in Frankfurt. The database has public access blocked and expires November 20, 2026. Render’s optimized production build passed; startup applied migrations/imported the owner-approved catalog, and repeat startup preserved it. Both web and worker share the free instance, so idle sleep pauses processing.
 
 The hosted catalog contains three shops, six exact products, twelve published seller listings and six private drafts. Main routes/readiness return 200, public private-field redaction passed, unauthenticated owner access returns 401, forged origins return 403 and unsigned webhooks return 400. All configured provider flags are present; no live discovery/flight calls were made in this deployment review.
 
-A real hosted Groq negotiation completed: Pixel Port moved from USD 46 to USD 44 including five-day delivery after a buyer counteroffer, within a USD 50/seven-day brief; Studio Stack declined its final counteroffer. The hosted sandbox PayPal webhook is registered with its correct environment ID, and the environment restart is Live. Buyer approval/capture and genuine signed hosted notification processing still require a new human-completed sandbox purchase. See [document 26](26-render-deployment.md) for exact evidence and constraints.
+A real hosted Groq negotiation completed: Pixel Port moved from USD 46 to USD 44 including five-day delivery after a buyer counteroffer, within a USD 50/seven-day brief; Studio Stack declined its final counteroffer. The hosted sandbox PayPal webhook is registered with its matching environment ID. The project owner subsequently confirmed completing a buyer-approved PayPal sandbox payment end to end on the hosted app. This is owner-reported confirmation; no order or capture reference was supplied for this status update, and the hosted signed-notification record is not separately documented. See [document 26](26-render-deployment.md) for the evidence boundary and constraints.
 
 ## Card-free deployment preparation — October 21
 
@@ -32,7 +40,7 @@ The user completed an actual PayPal sandbox purchase of one Bellroy Classic Back
 
 Live notification delivery exposed a JSON-ordering fault: validation rebuilt PayPal's signed event before postback verification. The receiver now preserves the exact original request text for verification while validating the parsed payload separately. The genuine original passed PayPal verification while the reordered object failed. The actual approval and completed-capture notifications were recovered from ngrok, verified, durably stored and processed once without errors. No new charge, refund or stock adjustment was initiated during verification. See [the payment evidence](24-sandbox-payment-evidence.md).
 
-All 120 regression tests, strict TypeScript and the final optimized production build passed, including exact signed-byte preservation and malformed-JSON rejection. Two HTTP replays of the authentic capture notification through ngrok returned 200; the inbox, payment completion and consumed reservation remained unique. Live refund completion and hosted deployment/webhook checks remain outstanding; earlier statements about missing capture and local signed-notification evidence are superseded by this record.
+All 120 regression tests, strict TypeScript and the final optimized production build passed, including exact signed-byte preservation and malformed-JSON rejection. Two HTTP replays of the authentic capture notification through ngrok returned 200; the inbox, payment completion and consumed reservation remained unique. The owner later confirmed a successful hosted sandbox purchase end to end. Hosted transaction references and a separate hosted webhook-processing record have not been added here; earlier statements that the hosted buyer flow was entirely untested are superseded by the owner’s confirmation.
 
 ## Faster negotiations and order payments — October 20
 
