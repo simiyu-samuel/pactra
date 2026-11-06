@@ -86,7 +86,9 @@ Set `NEGOTIATIONS_PER_BROWSER_PER_DAY` to an integer from 1 to 100 in the server
 
 ## Seller workspace
 
-**Judges:** choose **Try the seller workspace** from the homepage, or open [the one-click practice workspace](https://pactra-web.onrender.com/seller-preview). No access code is needed. Product and rule edits stay in that tab and reset on refresh; real stock, private rules and payments remain protected. See [judge access and testing instructions](docs/28-judge-seller-access.md).
+**Judges:** choose **Try the seller workspace** from the homepage, or open [the shared seller workspace](https://pactra-web.onrender.com/seller-demo). No access code is needed. Add or edit products, publish them, save agent rules, then use the same products in the marketplace and buyer negotiation. Changes are saved in the shared demo database and survive refresh. Orders and PayPal sandbox payment/refund tools use the normal seller flow. See [judge access and testing instructions](docs/28-judge-seller-access.md).
+
+This open entry requires `SELLER_DEMO_ACCESS=true`, `PAYPAL_ENV=sandbox`, and a configured owner secret. It creates a separate expiring seller session without revealing or submitting the owner code. Disable `SELLER_DEMO_ACCESS` to reject demo sessions immediately; normal owner sign-in remains available. The hosted catalog is intentionally shared hackathon data, and all visitors can change it. Do not enable this mode for a private production catalog.
 
 Run `pnpm setup:owner` once to generate a strong owner access code in the ignored `.env.local` file. The command preserves an existing valid code and never prints it. Restart the web server, open `/seller-console`, and copy `OWNER_LOGIN_SECRET` from your local file into the sign-in form. Do not share or commit the code.
 

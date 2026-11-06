@@ -2,9 +2,9 @@
 
 Updated November 6, 2026. The other documents describe the intended hackathon release; this file records verified behavior. Dated entries below the current update preserve earlier implementation and deployment history.
 
-## Judge seller entry — November 6
+## Shared judge seller entry — November 6
 
-A one-click `/seller-preview` practice workspace reuses the seller console without an access code. Visible homepage/header links and the existing owner sign-in page lead into it. It copies only published public catalog details and uses example minimums, stock and instructions. Product/rule edits and activity stay in a per-page memory store and reset on refresh. It cannot read private orders or call owner/refund APIs. Actual seller administration stays protected at `/seller-console`. Release `0489ea4` is live on Render; 47 local unit tests, the desktop/phone seller walkthrough, TypeScript, production build and GitHub CI passed. Hosted practice rule saving/reset and private API rejection were verified. See [judge access](28-judge-seller-access.md) for testing instructions and remaining submission work.
+At the owner's explicit request, the earlier temporary practice copy is replaced with full access to the existing shared hackathon seller database. `/seller-demo` obtains a real seller session without exposing the owner code; `/seller-preview` redirects to it. Product, stock and agent-rule edits persist and feed the actual marketplace and new negotiations. Orders and sandbox payment/refund tools use the existing seller APIs. The selected shop survives refresh through its URL. Open entry requires explicit server enablement and PayPal sandbox; disabling it rejects demo sessions. All 128 isolated unit/integration tests pass. See [judge access](28-judge-seller-access.md) for testing instructions and verification.
 
 ## Credit-funded, always-on Render deployment — November 6
 

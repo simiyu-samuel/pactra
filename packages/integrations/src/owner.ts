@@ -6,6 +6,19 @@ const digest = (value: string) => createHash('sha256').update(value).digest('hex
 export const ownerSessionSeconds = 4 * 60 * 60;
 export const ownerConfigured = () => (process.env.OWNER_LOGIN_SECRET?.length ?? 0) >= 32;
 const credentialDigest = () => digest(process.env.OWNER_LOGIN_SECRET || '');
+// Explicitly enabled only on the shared hackathon sandbox. Rechecked for every
+// demo session so disabling the flag, rotating the secret or leaving sandbox revokes access.
+export const sellerDemoEnabled = () => process.env.SELLER_DEMO_ACCESS === 'true' && process.env.PAYPAL_ENV === 'sandbox' && ownerConfigured();
+const demoCredentialDigest = () => digest('pactra-shared-seller-demo:' + credentialDigest());
+async function issueSession(credential: string) {
+  const token = randomBytes(32).toString('base64url');
+  const session = await db.ownerSession.create({ data: { tokenHash: digest(token), credentialDigest: credential, expiresAt: new Date(Date.now() + ownerSessionSeconds * 1000) } });
+  return { token, expiresAt: session.expiresAt };
+}
+export async function loginDemoSeller() {
+  if (!sellerDemoEnabled()) throw new RuleError('SELLER_DEMO_DISABLED', 'The shared seller demo is not available on this server.', 403);
+  return issueSession(demoCredentialDigest());
+}
 
 export async function loginOwner(secret: string) {
   if (!ownerConfigured()) throw new RuleError('OWNER_NOT_CONFIGURED', 'Owner access has not been configured on this server.', 503);
@@ -24,16 +37,15 @@ export async function loginOwner(secret: string) {
   });
   if (!admitted) throw new RuleError('OWNER_RATE_LIMIT', 'Too many owner sign-in attempts. Try again in 15 minutes.', 429);
   if (!valid) throw new RuleError('OWNER_LOGIN_FAILED', 'Owner access code was not accepted.', 401);
-  const token = randomBytes(32).toString('base64url');
-  const session = await db.ownerSession.create({ data: { tokenHash: digest(token), credentialDigest: credentialDigest(), expiresAt: new Date(Date.now() + ownerSessionSeconds * 1000) } });
-  return { token, expiresAt: session.expiresAt };
+  return issueSession(credentialDigest());
 }
 
 export async function requireOwner(token?: string) {
   if (!ownerConfigured() || !token) throw new RuleError('OWNER_REQUIRED', 'Sign in as the project owner to manage seller policies.', 401);
   const session = await db.ownerSession.findUnique({ where: { tokenHash: digest(token) } });
-  if (!session || +session.expiresAt <= Date.now() || session.credentialDigest !== credentialDigest()) throw new RuleError('OWNER_REQUIRED', 'Your owner session expired. Sign in again.', 401);
-  return session;
+  const demo = session?.credentialDigest === demoCredentialDigest();
+  if (!session || +session.expiresAt <= Date.now() || (demo ? !sellerDemoEnabled() : session.credentialDigest !== credentialDigest())) throw new RuleError('OWNER_REQUIRED', 'Your owner session expired. Sign in again.', 401);
+  return { ...session, demo };
 }
 
 export async function logoutOwner(token?: string) {

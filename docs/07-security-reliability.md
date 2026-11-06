@@ -68,3 +68,8 @@ Alert or visibly flag repeated signature failures, payment mismatches, unresolve
 ## Recovery exercises before launch
 
 Restart the worker halfway through a seller round, refresh the room during negotiation, disconnect SSE and reconnect, retry capture after a timeout, deliver a duplicate/out-of-order webhook, and send a stale brief acceptance command. All must preserve ownership, exact agreement, inventory, and payment correctness.
+
+
+## Owner-approved shared hackathon seller access — November 6
+
+The hosted catalog and seller/payment records are shared demo data. The owner explicitly approved judges modifying these existing records and testing the complete flow. Open entry at `/seller-demo` requires `SELLER_DEMO_ACCESS=true`, explicit PayPal sandbox and a configured owner secret. A server-generated, hashed, four-hour session uses a distinct credential digest; the actual owner code never reaches the judge browser. The regular same-origin mutation check, HttpOnly cookie, version/stock/price validation and explicit sandbox payment/refund approvals remain active. Every demo session is rejected when demo mode is disabled or PayPal leaves sandbox. This public role exposes seller rules and sandbox order projections to anyone who chooses it; it is intended only for the shared hackathon service. Public buyer projections still omit private agent context. See [judge access](28-judge-seller-access.md).

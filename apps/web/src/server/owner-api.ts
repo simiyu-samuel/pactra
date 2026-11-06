@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@pactra/database';
-import { loginOwner, logoutOwner, requireOwner, ownerConfigured, ownerSessionSeconds, publishPolicy, addSellerProduct, updateSellerProduct, sellerOrders, requestOrderRefund, approveOrderRefund, assistOrder, reconcileCheckout } from '@pactra/integrations';
+import { loginOwner, loginDemoSeller, sellerDemoEnabled, logoutOwner, requireOwner, ownerConfigured, ownerSessionSeconds, publishPolicy, addSellerProduct, updateSellerProduct, sellerOrders, requestOrderRefund, approveOrderRefund, assistOrder, reconcileCheckout } from '@pactra/integrations';
 import { RuleError } from '@pactra/domain';
 import { z } from 'zod';
 
@@ -12,8 +12,20 @@ const reply = (body: unknown) => NextResponse.json(body, { headers: { 'Cache-Con
 export async function ownerApi(req: NextRequest, path: string[], readBody: () => Promise<unknown>) {
   const token = req.cookies.get(cookie)?.value;
   if (path.length === 1 && path[0] === 'session' && req.method === 'GET') {
-    try { await requireOwner(token); return reply({ authenticated: true, configured: true }); }
-    catch (error) { if (!(error instanceof RuleError) || error.code !== 'OWNER_REQUIRED') throw error; return reply({ authenticated: false, configured: ownerConfigured() }); }
+    try { const owner = await requireOwner(token); return reply({ authenticated: true, configured: true, demoAccess: sellerDemoEnabled(), demoSession: owner.demo }); }
+    catch (error) { if (!(error instanceof RuleError) || error.code !== 'OWNER_REQUIRED') throw error; return reply({ authenticated: false, configured: ownerConfigured(), demoAccess: sellerDemoEnabled(), demoSession: false }); }
+  }
+  if (path.length === 1 && path[0] === 'demo-login' && req.method === 'POST') {
+    z.object({}).strict().parse(await readBody());
+    if (!sellerDemoEnabled()) throw new RuleError('SELLER_DEMO_DISABLED', 'The shared seller demo is not available on this server.', 403);
+    try {
+      const existing = await requireOwner(token);
+      return reply({ authenticated: true, configured: true, demoAccess: true, demoSession: existing.demo, expiresAt: existing.expiresAt });
+    } catch (error) { if (!(error instanceof RuleError) || error.code !== 'OWNER_REQUIRED') throw error; }
+    const session = await loginDemoSeller();
+    const response = reply({ authenticated: true, configured: true, demoAccess: true, demoSession: true, expiresAt: session.expiresAt });
+    response.cookies.set(cookie, session.token, { ...cookieOptions(), maxAge: ownerSessionSeconds });
+    return response;
   }
   if (path.length === 1 && path[0] === 'login' && req.method === 'POST') {
     const { secret } = z.object({ secret: z.string().max(256) }).strict().parse(await readBody());

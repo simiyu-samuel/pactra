@@ -54,7 +54,7 @@ Keep narration aligned with the live recording. If the transaction takes longer 
 ## Rehearsal preparation
 
 1. Verify the deployed release, worker readiness, database, provider quotas, and webhook configuration.
-2. Open the marketplace in a clean guest session, try the one-click `/seller-preview` practice workspace, and confirm the real `/seller-console` remains protected. Use the authenticated owner workspace when demonstrating rules affecting live negotiations.
+2. Open the marketplace in a clean guest session, open the one-click `/seller-demo` workspace, publish a product or save a rule, and verify that the marketplace and a new negotiation use it. This shared sandbox access is intentional; anonymous API requests still require a seller session.
 3. Choose a currently published, in-stock product and verify that multiple sellers can respond to its brief.
 4. Prepare a separate PayPal Sandbox buyer privately; keep credentials off screen and out of the recording.
 5. Check stock reservations and unresolved payments before any owner reset.
@@ -81,4 +81,4 @@ Keep narration aligned with the live recording. If the transaction takes longer 
 
 The public [source repository](https://github.com/simiyu-samuel/pactra) and hosted [Pactra demo](https://pactra-web.onrender.com) are available. The Devpost draft, public video recording, and final submission remain to be completed.
 
-Judge access now has a [one-click seller practice workspace and ready-to-paste testing instructions](28-judge-seller-access.md); no owner code needs to be shared.
+Judge access now has a [one-click shared seller workspace and ready-to-paste testing instructions](28-judge-seller-access.md); no owner code needs to be shared.

@@ -29,6 +29,9 @@ services:
       type: web
       name: pactra-web
       envVarKey: RENDER_EXTERNAL_URL
+  # Owner-approved shared demo catalog: judges can persist seller edits without a code.
+  - key: SELLER_DEMO_ACCESS
+    value: 'true'
   - key: OWNER_LOGIN_SECRET
     generateValue: true
   - key: NEGOTIATIONS_PER_BROWSER_PER_DAY

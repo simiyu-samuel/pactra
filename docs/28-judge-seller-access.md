@@ -1,48 +1,44 @@
-# One-click seller experience for judges
+# One-click shared seller experience for judges
 
-November 6, 2026.
+November 6, 2026. This replaces the earlier browser-only practice copy at the owner's explicit request. The existing catalog, seller settings, orders and payments are hackathon demo data; judges may modify that shared database and test the complete buyer/seller flow.
 
-## Entry points
+## Entry and full flow
 
-Open [Pactra](https://pactra-web.onrender.com) and choose **Try the seller workspace** in the hero, or **Try seller workspace** in the header navigation. On phones, the header link is inside the navigation menu; the hero action is visible without opening it. The direct link is https://pactra-web.onrender.com/seller-preview. The owner sign-in page also offers this entry.
+Choose **Try the seller workspace** from the homepage hero or header, or open https://pactra-web.onrender.com/seller-demo. The older `/seller-preview` URL redirects here. No owner code is needed.
 
-The practice workspace opens immediately without a shared access code. It reuses the seller sidebar, catalog, product editor, rules editor and activity history. Judges can switch between shops with published products, search/filter the catalog, add or edit a product, try price and stock settings, save agent rules and inspect the resulting activity history.
+The page obtains a real four-hour seller session through a same-origin POST, then opens the existing seller console. Judges can select any existing shop, edit its products, add a new product, set asking/minimum prices and stock, publish/archive products, update agent instructions and delivery promises, and inspect the activity history. Saves use the normal database-backed APIs. The selected shop is kept in the URL so refresh returns to that shop; saved changes survive refresh, sign-out and a new browser session.
 
-## Data and access boundary
+A published product appears in the actual marketplace and can be selected for a new buyer negotiation. The worker reads the saved seller rules, stock and minimums. Version checks still reject conflicting edits or stale offers; existing accepted agreements retain their original terms. Orders, payment checks, the order assistant and separately approved sandbox refunds remain the normal seller features. The buyer must approve the exact PayPal Sandbox payment.
 
-The workspace reads the existing public catalog once. It uses published product names, photos, asking prices and delivery promises. It generates separate practice identifiers, example minimum prices, example stock of ten units, example instructions and a new local history. Real owner notes, draft products, minimum prices, stock holds and historical private records are never fetched.
+All visitors use the same demo catalog. Their published products and saved settings affect one another; the banner explains this. Drafts are hidden from the buyer marketplace, but judges entering the shared seller role can inspect and edit them. Do not enter personal information or real credentials into product details or agent instructions.
 
-Each page instance owns an in-memory store. Saving changes only that page instance; refreshing restores the public catalog and example settings. Practice changes do not affect real offers, inventory or seller policies. The persistent banner and product editor identify this boundary. The practice Orders & payments view explains the actual workflow and links to the buyer negotiation; it contains no fabricated transaction or payment reference and cannot issue refunds. A buyer can still complete a real PayPal sandbox checkout through the normal buyer flow.
+## Access mechanism
 
-The existing `/seller-console` owner sign-in and all `/api/owner/*` authorization checks remain in place. No owner credential is placed in a URL, shipped in a client bundle, embedded in a public button or exchanged for a session by this preview. Every practice action stays local; unsupported paths fail without an HTTP fallback.
+Open entry requires all three server conditions: `SELLER_DEMO_ACCESS=true`, explicit `PAYPAL_ENV=sandbox`, and a configured strong `OWNER_LOGIN_SECRET`. The environment example defaults the open-entry flag to false; the owner-approved Render Blueprint sets it true for this shared hackathon service.
+
+`POST /api/owner/demo-login` creates a random, hashed, expiring session in the existing owner-session table, using a distinct credential digest. The existing HttpOnly, Secure-in-production, SameSite=Strict cookie remains scoped to `/api/owner`. No owner access code is embedded in a URL, a client bundle or a request from the judge. The route checks the standard mutation origin and accepts only an empty object. Valid existing seller sessions are reused. Open entry does not spend the private owner's failed-sign-in quota.
+
+Every protected request rechecks the demo enablement and explicit sandbox setting. Disabling the flag, leaving sandbox, expiration, logout or rotating the owner secret invalidates access as applicable. Owner-code sessions retain the normal independent sign-in flow. Anonymous callers without a seller session still cannot read or write owner APIs. Public buyer catalog/room projections continue to exclude private seller context.
 
 ## Devpost testing instructions (ready to paste)
 
-> Open https://pactra-web.onrender.com. Choose an in-stock product, select **Start a negotiation**, set a total budget that includes delivery, and confirm the request. Watch the buyer and seller agents negotiate, compare eligible offers and review an agreement. The buyer must approve the exact PayPal Sandbox payment; a separate PayPal Sandbox Personal buyer account is required for that step. No real money is charged or goods shipped. This browser allows three new negotiations in a rolling 24-hour window; existing rooms can be reopened.
+> Open https://pactra-web.onrender.com and choose **Try the seller workspace**, or go directly to https://pactra-web.onrender.com/seller-demo. No code is needed. This opens the full shared demo seller workspace.
 >
-> To explore the seller side without credentials, choose **Try the seller workspace** on the homepage or open https://pactra-web.onrender.com/seller-preview. Edit products, save example agent rules, switch shops and inspect Activity. This is an interactive practice copy: stock and minimum prices are examples, edits stay in the current tab and refresh resets them. Real seller orders and refund controls remain private.
+> Select a shop. Edit an existing product or choose **Add product**. Enter product details and a direct HTTPS photo URL, asking price, minimum price and available stock. Choose **Published**, confirm the price/stock check and save. Refresh to verify the product persists. You can also update Agent rules and delivery fees; save a short change note.
 >
-> Channel3 store discovery and test-mode flights are optional tools; the main demonstration is buyer/seller agent negotiation followed by buyer-approved PayPal Sandbox checkout.
+> Choose **View marketplace**, find the product and select **Negotiate this item**. Set a total budget including delivery and start the negotiation. Watch the buyer and seller agents negotiate using the saved catalog and seller rules, compare eligible offers and review an agreement. The buyer must approve the exact PayPal Sandbox payment using a separate Sandbox Personal buyer account. No real money is charged or goods shipped. The shared seller workspace shows the order/payment record and supports separately approved sandbox refund requests.
+>
+> All visitors share this hackathon catalog, so published product and rule changes affect other visitors. Accepted agreements keep their original terms. Each buyer browser allows three new negotiations in a rolling 24-hour window; existing rooms can be reopened. Channel3 discovery and test-mode flights are optional tools; the main demonstration is seller setup → marketplace → agent negotiation → buyer-approved PayPal Sandbox checkout.
 
-Show the real authenticated seller/payment workflow in the project video. Never publish the owner access code. If organizers require sandbox buyer credentials, share a dedicated sandbox test account through the judges-only field rather than real PayPal credentials or the seller owner code.
+Never share the actual owner code. If organizers require buyer credentials, use a dedicated PayPal sandbox test account in the judges-only field, never a real PayPal account.
 
 ## Remaining release work
 
-1. Record and upload the required public or unlisted YouTube demo under three minutes; verify playback while signed out. Show a real hosted negotiation/payment and the authenticated seller flow; label practice screens accurately.
-2. Add the seller-practice link and these testing instructions to Devpost; finish the contribution field and remaining submission fields; verify the thumbnail, source URL, demo URL and final submission status.
-3. Before judging, repeat the hosted smoke check and record non-sensitive hosted order/capture and processed signed-webhook evidence. Local capture/refund/webhook evidence is already documented in documents 24–25; the earlier hosted payment is owner-confirmed but its references are not yet recorded in document 26.
-4. Check remaining Render credit near judging. The current always-on app, separate worker and paid database are active; do not change billing or provision extra services for this feature.
+- Record/upload the required public or unlisted YouTube demo under three minutes; show the actual shared seller → marketplace → negotiation → sandbox payment flow.
+- Update Devpost's testing instructions and links, confirm the contribution and remaining fields, verify the video/thumbnail/public source/demo URLs, and finish submission.
+- Before judging, repeat the hosted smoke check and record non-sensitive hosted capture/signed-webhook evidence. Local payment/refund/webhook evidence is already documented in documents 24–25.
+- Review remaining Render credit near judging. This seller change adds no service or paid plan.
 
 ## Verification
 
-All 47 unit tests passed, including four practice-boundary checks for private-field exclusion, per-visitor isolation, rejection of privileged routes and local validation/history. A Chromium walkthrough passed product editing, rule saving, section navigation, refresh reset, absence of owner API requests/session cookies and 390px mobile navigation without horizontal overflow. Strict TypeScript and the optimized Next.js production build passed. The initial local build encountered an old temporary-cache symlink whose target had been removed; recreating that regenerable cache directory resolved it. No real catalog, payment or refund mutation was made. GitHub Actions also passed for release commit `0489ea4` ([run](https://github.com/simiyu-samuel/pactra/actions/runs/42176352195)).
-
-## Hosted verification
-
-Render web deployment `dep-dbmnemh5efls7384dl0g` for commit `0489ea4` became Live on November 6, 2026 at 09:47:33 EAT. Pre-deploy reported no pending migrations and preserved the initialized catalog of three shops, six products and eighteen listings. No worker/database configuration changed.
-
-Hosted storefront, seller preview, owner sign-in, negotiation, orders and database health returned HTTP 200. Public bootstrap retained twelve published listings and excluded private pricing/instructions/session secrets. Unauthenticated owner catalog reads and product writes both returned 401.
-
-The homepage hero opened the practice workspace in one click with no access-code field. Saving a speed-focused example rule displayed the practice-only confirmation; refreshing restored the example price-focused rule. The published product photos loaded in the grid. Phone navigation and agent-rule views fit a 390px viewport without horizontal overflow; the viewport was restored afterward. The workspace remains open for review. No real catalog edit, AI negotiation, payment or refund was initiated by these checks.
-
-[Hosted judge workspace screenshot](../assets/previews/pactra-judge-workspace.jpg).
+All 128 unit/integration tests passed against isolated `pactra_test`, including shared-session issuance, hashing/expiry/logout, explicit sandbox/flag gating and revocation. The database-backed Chromium walkthrough passed one-click sign-in, existing product editing, refresh persistence (including the selected shop), adding/publishing a new product, saving delivery rules, marketplace visibility, new-product negotiation admission, real seller orders, forged-origin rejection and logout. It used isolated `pactra_test`, with no real provider/payment calls. Strict TypeScript and the optimized production build passed. Hosted activation and real worker verification remain to be recorded.
