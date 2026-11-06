@@ -58,7 +58,7 @@ async function dispatch(req: NextRequest, path: string[]) {
       token = randomBytes(32).toString('base64url');
       existing = await db.browserSession.create({ data: { tokenHash: hash(token), expiresAt: new Date(Date.now() + 86_400_000) } });
     }
-    const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true, name: true, strategy: true, warrantyMonths: true, standardDays: true, expressDays: true, listings: { where: { status: 'active', product: { isDemo: false } }, select: { id: true, listCents: true, onHand: true, reserved: true, product: true } } } });
+    const sellers = await db.seller.findMany({ orderBy: { id: 'asc' }, select: { id: true, name: true, strategy: true, warrantyMonths: true, standardCents: true, standardDays: true, expressCents: true, expressDays: true, listings: { where: { status: 'active', product: { isDemo: false } }, select: { id: true, listCents: true, onHand: true, reserved: true, product: true } } } });
     const response = ok({ negotiationAllowance: await negotiationAllowance(existing.id), sellers: sellers.map(s => ({ ...s, listings: s.listings.map(({ onHand, reserved, ...l }) => ({ ...l, available: onHand - reserved })) })), capabilities: { groq: Boolean(process.env.GROQ_API_KEY), paypal: paymentConfigured(), channel3: Boolean(process.env.CHANNEL3_API_KEY), model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b' } });
     response.cookies.set(cookieName, token!, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 86400, path: '/' });
     return response;
