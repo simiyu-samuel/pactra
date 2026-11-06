@@ -54,7 +54,7 @@ Keep narration aligned with the live recording. If the transaction takes longer 
 ## Rehearsal preparation
 
 1. Verify the deployed release, worker readiness, database, provider quotas, and webhook configuration.
-2. Open the marketplace in a clean guest session and confirm the owner workspace remains protected.
+2. Open the marketplace in a clean guest session, try the one-click `/seller-preview` practice workspace, and confirm the real `/seller-console` remains protected. Use the authenticated owner workspace when demonstrating rules affecting live negotiations.
 3. Choose a currently published, in-stock product and verify that multiple sellers can respond to its brief.
 4. Prepare a separate PayPal Sandbox buyer privately; keep credentials off screen and out of the recording.
 5. Check stock reservations and unresolved payments before any owner reset.
@@ -80,3 +80,5 @@ Keep narration aligned with the live recording. If the transaction takes longer 
 - [ ] Submission is completed by the internal November 11 target; final event cutoff from supplied brief is November 12, 23:00 EAT.
 
 The public [source repository](https://github.com/simiyu-samuel/pactra) and hosted [Pactra demo](https://pactra-web.onrender.com) are available. The Devpost draft, public video recording, and final submission remain to be completed.
+
+Judge access now has a [one-click seller practice workspace and ready-to-paste testing instructions](28-judge-seller-access.md); no owner code needs to be shared.

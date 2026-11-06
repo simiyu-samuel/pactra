@@ -2,6 +2,10 @@
 
 Updated November 6, 2026. The other documents describe the intended hackathon release; this file records verified behavior. Dated entries below the current update preserve earlier implementation and deployment history.
 
+## Judge seller entry — November 6
+
+A one-click `/seller-preview` practice workspace reuses the seller console without an access code. Visible homepage/header links and the existing owner sign-in page lead into it. It copies only published public catalog details and uses example minimums, stock and instructions. Product/rule edits and activity stay in a per-page memory store and reset on refresh. It cannot read private orders or call owner/refund APIs. Actual seller administration stays protected at `/seller-console`. See [judge access](28-judge-seller-access.md) for testing instructions and remaining submission work.
+
 ## Credit-funded, always-on Render deployment — November 6
 
 The owner added a payment method and approved USD 20.30/month base infrastructure, funded first by the USD 50 hackathon credit. The existing web service and database were upgraded in place, and a separate background worker is now Live. Both compute services use `0.5c-512mb`; PostgreSQL 18 uses `0.1c-256mb` with its existing 1 GB storage. The free-database expiry notice is gone and the public URL remains https://pactra-web.onrender.com. The workspace remains Hobby; Blueprint and service deployments are manual.

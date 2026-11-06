@@ -15,7 +15,7 @@ export default function MarketplaceHero() {
         <p>Buyers want better terms. Sellers need fair margins. Pactra gives each side an agent to work towards a deal.</p>
         <div className={s.actions}>
           <a href="/negotiate" className={s.primary}>Start a negotiation <ArrowUpRight size={18}/></a>
-          <a href="/seller-console" className={s.secondary}>Set up your seller agent <ArrowUpRight size={15}/></a>
+          <a href="/seller-preview" className={s.secondary}>Try the seller workspace <ArrowUpRight size={15}/></a>
         </div>
         <div className={s.proof}><ShieldCheck size={16}/><span>Your limits respected. Your approval, always.</span></div>
       </div>

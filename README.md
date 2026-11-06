@@ -86,9 +86,11 @@ Set `NEGOTIATIONS_PER_BROWSER_PER_DAY` to an integer from 1 to 100 in the server
 
 ## Seller workspace
 
+**Judges:** choose **Try the seller workspace** from the homepage, or open [the one-click practice workspace](https://pactra-web.onrender.com/seller-preview). No access code is needed. Product and rule edits stay in that tab and reset on refresh; real stock, private rules and payments remain protected. See [judge access and testing instructions](docs/28-judge-seller-access.md).
+
 Run `pnpm setup:owner` once to generate a strong owner access code in the ignored `.env.local` file. The command preserves an existing valid code and never prints it. Restart the web server, open `/seller-console`, and copy `OWNER_LOGIN_SECRET` from your local file into the sign-in form. Do not share or commit the code.
 
-The workspace controls each fictional seller's strategy, private instructions, minimum prices, total stock, shipping, and warranty. Publishing requires a change note and creates a new immutable policy version. Private instructions and floors stay behind separate owner authentication. Existing reservations keep their accepted snapshot; unlocked old-policy offers become ineligible. Reload a draft if another edit, stock movement, or reservation conflicts with it. Owner sessions expire after four hours, sign-out revokes them, and changing the configured access code invalidates existing sessions.
+The signed-in workspace controls each seller's strategy, private instructions, minimum prices, total stock, shipping, and warranty. Publishing requires a change note and creates a new immutable policy version. Private instructions and floors stay behind separate owner authentication. Existing reservations keep their accepted snapshot; unlocked old-policy offers become ineligible. Reload a draft if another edit, stock movement, or reservation conflicts with it. Owner sessions expire after four hours, sign-out revokes them, and changing the configured access code invalidates existing sessions.
 
 New buyer briefs retain every confirmed revision; rooms show their brief history after revision. New checkouts reference their original brief and seller policy records. The migration captures available current values from older data; it cannot reconstruct earlier values that had already been overwritten.
 
